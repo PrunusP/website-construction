@@ -1,0 +1,143 @@
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #f4f6f1;
+      color: #19212a;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+
+    .page {
+      width: min(720px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 24px 0 40px;
+    }
+
+    h1 {
+      margin: 0 0 22px;
+      font-size: 2.4rem;
+      letter-spacing: 0;
+    }
+
+    .input-box,
+    .account-box {
+      background: #fff;
+      border: 1px solid #d9e0e6;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 12px 28px rgba(25, 33, 42, 0.08);
+    }
+
+    .input-box {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 12px;
+      color: #66717e;
+      font-size: 0.95rem;
+    }
+
+    select,
+    input {
+      width: 100%;
+      height: 44px;
+      margin-top: 6px;
+      padding: 0 12px;
+      border: 1px solid #d9e0e6;
+      border-radius: 8px;
+      background: #fff;
+      color: #19212a;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      height: 46px;
+      border: 0;
+      border-radius: 8px;
+      background: #19212a;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .accounts {
+      display: grid;
+      gap: 14px;
+    }
+
+    .account-box {
+      position: relative;
+      padding-bottom: 42px;
+    }
+
+    .account-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .money {
+      color: #18805c;
+      font-weight: 800;
+    }
+
+    .open-button {
+      position: absolute;
+      right: 14px;
+      bottom: 10px;
+      width: 34px;
+      height: 28px;
+      border: 0;
+      background: transparent;
+      color: #19212a;
+      font-size: 1.5rem;
+      transform: rotate(90deg);
+      cursor: pointer;
+    }
+
+    .account-box.open .open-button {
+      transform: rotate(-90deg);
+    }
+
+    .records {
+      display: none;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #d9e0e6;
+    }
+
+    .account-box.open .records {
+      display: block;
+    }
+
+    .record {
+      padding: 8px 0;
+      border-bottom: 1px solid #eef1f3;
+      font-size: 0.98rem;
+    }
+
+    .record:last-child {
+      border-bottom: 0;
+    }
+
+    .plus {
+      color: #18805c;
+      font-weight: 800;
+    }
+
+    .minus {
+      color: #c84b45;
+      font-weight: 800;
+    }
+
+    .empty {
+      color: #66717e;
+      font-size: 0.95rem;
+    }
