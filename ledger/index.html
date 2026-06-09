@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>记账本</title>
+  <link rel="stylesheet" href="./styles.css" />
+ 
+</head>
+
+<body>
+  <main class="page">
+    <h1>记账本</h1>
+
+    <section class="input-box">
+      <label>
+        1. 选择开支还是收入
+        <select id="type">
+          <option value="income">收入</option>
+          <option value="expense">开支</option>
+        </select>
+      </label>
+
+      <label>
+        记到哪里
+        <select id="account">
+          <option value="short">短期</option>
+          <option value="long">长期</option>
+          <option value="saving">存款</option>
+        </select>
+      </label>
+
+      <label>
+        2. 填金额
+        <input id="amount" type="number" min="0.01" step="0.01" placeholder="例如：100" />
+      </label>
+
+      <label>
+        3. 写原因
+        <input id="reason" type="text" placeholder="例如：妈妈打赏" />
+      </label>
+
+      <button id="addBtn">添加</button>
+    </section>
+
+    <section class="accounts">
+      <div class="account-box" data-account="short">
+        <div class="account-title">短期：xxx（<span class="money" id="shortMoney">0</span>）</div>
+        <div class="records" id="shortRecords"></div>
+        <button class="open-button">›</button>
+      </div>
+
+      <div class="account-box" data-account="long">
+        <div class="account-title">长期：xxx（<span class="money" id="longMoney">0</span>）</div>
+        <div class="records" id="longRecords"></div>
+        <button class="open-button">›</button>
+      </div>
+
+      <div class="account-box" data-account="saving">
+        <div class="account-title">存款：xxx（<span class="money" id="savingMoney">0</span>）</div>
+        <div class="records" id="savingRecords"></div>
+        <button class="open-button">›</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const data = {
+      short: { money: 0, records: [] },
+      long: { money: 0, records: [] },
+      saving: { money: 0, records: [] }
+    };
+
+    const typeInput = document.getElementById("type");
+    const accountInput = document.getElementById("account");
+    const amountInput = document.getElementById("amount");
+    const reasonInput = document.getElementById("reason");
+    const addBtn = document.getElementById("addBtn");
+
+    addBtn.addEventListener("click", function () {
+      const type = typeInput.value;
+      const account = accountInput.value;
+      const amount = Number(amountInput.value);
+      const reason = reasonInput.value.trim();
+
+      if (!amount || amount <= 0) {
+        alert("请填写正确的金额");
+        return;
+      }
+
+      if (!reason) {
+        alert("请填写原因");
+        return;
+      }
+
+      if (type === "income") {
+        data[account].money += amount;
+      } else {
+        data[account].money -= amount;
+      }
+
+      data[account].records.unshift({
+        type,
+        amount,
+        afterMoney: data[account].money,
+        reason
+      });
+
+      amountInput.value = "";
+      reasonInput.value = "";
+
+      render();
+    });
+
+    document.querySelectorAll(".open-button").forEach(function (button) {
+      button.addEventListener("click", function () {
+        button.closest(".account-box").classList.toggle("open");
+      });
+    });
+
+    function render() {
+      renderAccount("short", "shortMoney", "shortRecords");
+      renderAccount("long", "longMoney", "longRecords");
+      renderAccount("saving", "savingMoney", "savingRecords");
+    }
+
+    function renderAccount(account, moneyId, recordsId) {
+      document.getElementById(moneyId).textContent = data[account].money;
+
+      const recordsBox = document.getElementById(recordsId);
+      const records = data[account].records;
+
+      if (records.length === 0) {
+        recordsBox.innerHTML = '<div class="empty">还没有记账</div>';
+        return;
+      }
+
+      recordsBox.innerHTML = records.map(function (item) {
+        const sign = item.type === "income" ? "+" : "-";
+        const className = item.type === "income" ? "plus" : "minus";
+
+        return `
+          <div class="record">
+            <span class="${className}">
+              ${sign}${item.amount}（${item.afterMoney}）
+            </span>
+            ${item.reason}
+          </div>
+        `;
+      }).join("");
+    }
+
+    render();
+  </script>
+</body>
+</html>
