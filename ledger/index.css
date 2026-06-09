@@ -1,0 +1,100 @@
+/* 记账本 CSS：添加到总 CSS 最下面 */
+.ledger-page .ledger-shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0 40px;
+}
+
+.ledger-page .ledger-topbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 10px 0 20px;
+}
+
+.ledger-page .ledger-eyebrow {
+  margin: 0 0 4px;
+  color: var(--blue);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.ledger-page h1,
+.ledger-page h2 {
+  margin: 0;
+  letter-spacing: 0;
+}
+
+.ledger-page h1 {
+  font-size: clamp(2rem, 5vw, 4.2rem);
+  line-height: 1;
+}
+
+.ledger-page h2 {
+  font-size: 1.05rem;
+}
+
+.ledger-page .ledger-month-switcher,
+.ledger-page .ledger-filters,
+.ledger-page .ledger-record-side,
+.ledger-page .ledger-section-heading {
+  display: flex;
+  align-items: center;
+}
+
+.ledger-page .ledger-month-switcher,
+.ledger-page .ledger-filters {
+  gap: 8px;
+}
+
+.ledger-page .ledger-icon-button,
+.ledger-page .ledger-ghost-button,
+.ledger-page .ledger-primary-button,
+.ledger-page .ledger-delete-button,
+.ledger-page .ledger-ghost-link {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.ledger-page .ledger-icon-button {
+  width: 42px;
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.ledger-page .ledger-ghost-button,
+.ledger-page .ledger-ghost-link {
+  padding: 0 14px;
+}
+
+.ledger-page .ledger-ghost-link {
+  display: inline-grid;
+  place-items: center;
+  text-decoration: none;
+}
+
+.ledger-page .ledger-ghost-button.danger {
+  color: var(--red);
+}
+
+.ledger-page .ledger-primary-button {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+  font-weight: 800;
+}
+
+.ledger-page input,
+.ledger-page select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  padding: 0 12px;
+}
