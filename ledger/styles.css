@@ -142,14 +142,18 @@
       font-size: 0.95rem;
     }
 
-   a {
-      width: 100%;
-      height: 46px;
-      border: 0;
-      border-radius: 8px;
-      background: #19212a;
-      color: #fff;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
+   .addBtn {
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     width: 100%;
+     height: 46px;
+     margin-top: 18px;
+     border-radius: 8px;
+     background: #19212a;
+     color: #fff;
+     font-size: 1rem;
+     font-weight: 700;
+     text-decoration: none;
+     cursor: pointer;
+   }
