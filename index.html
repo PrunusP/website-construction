@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="zh-CN">
   <head>
+      
+    
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>你好</title>
@@ -18,5 +20,21 @@
         </nav>
       </section>
     </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./site-cloud-helper.js"></script>
+    <script>
+      async function checkEntryPermission() {
+        const isGuest = localStorage.getItem("site_guest_mode") === "yes";
+        if (isGuest) return;
+    
+        const user = await siteCloud.currentUser();
+        if (user) return;
+    
+        window.location.href = "./login.html?returnTo=./index.html";
+      }
+  
+      checkEntryPermission();
+    </script>
   </body>
 </html>
