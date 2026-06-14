@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>登录</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <style>
+      .login-shell {
+        width: min(460px, calc(100% - 32px));
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        margin: 0 auto;
+      }
+
+      .login-panel {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: var(--shadow);
+        padding: 22px;
+      }
+
+      .login-panel h1 {
+        margin: 0 0 18px;
+        font-size: 2rem;
+      }
+
+      .login-form {
+        display: grid;
+        gap: 12px;
+      }
+
+      .login-form label {
+        display: grid;
+        gap: 7px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .login-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .login-button {
+        min-height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--paper);
+        color: var(--ink);
+        padding: 0 14px;
+      }
+
+      .login-button.primary {
+        border-color: var(--ink);
+        background: var(--ink);
+        color: #fff;
+        font-weight: 800;
+      }
+
+      .login-status {
+        min-height: 22px;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="login-shell">
+      <section class="login-panel">
+        <h1>登录</h1>
+        <form class="login-form" id="loginForm">
+          <label for="emailInput">
+            邮箱
+            <input id="emailInput" type="email" autocomplete="email" required placeholder="name@example.com" />
+          </label>
+          <label for="passwordInput">
+            密码
+            <input id="passwordInput" type="password" autocomplete="current-password" required minlength="6" placeholder="至少 6 位" />
+          </label>
+          <div class="login-actions">
+            <button class="login-button primary" id="loginButton" type="button">登录</button>
+            <button class="login-button" id="registerButton" type="button">注册</button>
+            <button class="login-button" id="logoutButton" type="button">退出</button>
+          </div>
+          <p class="login-status" id="loginStatus">第一次使用请先注册，然后登录。</p>
+        </form>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./site-cloud-helper.js"></script>
+    <script>
+      const emailInput = document.querySelector("#emailInput");
+      const passwordInput = document.querySelector("#passwordInput");
+      const loginStatus = document.querySelector("#loginStatus");
+
+      function setStatus(message) {
+        loginStatus.textContent = message;
+      }
+
+      document.querySelector("#registerButton").addEventListener("click", async () => {
+        const { error } = await siteCloud.register(emailInput.value.trim(), passwordInput.value);
+        if (error) {
+          setStatus(error.message);
+          return;
+        }
+        setStatus("注册成功。如果系统要求验证邮箱，请先去邮箱点确认链接，然后回来登录。");
+      });
+
+      document.querySelector("#loginButton").addEventListener("click", async () => {
+        const { error } = await siteCloud.login(emailInput.value.trim(), passwordInput.value);
+        if (error) {
+          setStatus(error.message);
+          return;
+        }
+        setStatus("登录成功，正在进入网站。");
+        window.location.href = "./index.html";
+      });
+
+      document.querySelector("#logoutButton").addEventListener("click", async () => {
+        await siteCloud.logout();
+        setStatus("已退出登录。");
+      });
+
+      siteCloud.currentUser().then((user) => {
+        if (user) setStatus(`已经登录：${user.email}`);
+      });
+    </script>
+  </body>
+</html>
