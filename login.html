@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="./styles.css" />
     <style>
       .login-shell {
-        width: min(460px, calc(100% - 32px));
+        width: min(480px, calc(100% - 32px));
         min-height: 100vh;
         display: grid;
         place-items: center;
@@ -23,18 +23,13 @@
         padding: 22px;
       }
 
-      .login-panel h1 {
-        margin: 0 0 18px;
-        font-size: 2rem;
-      }
-
-      .login-form {
+      .login-form,
+      .login-form label {
         display: grid;
         gap: 12px;
       }
 
       .login-form label {
-        display: grid;
         gap: 7px;
         color: var(--muted);
         font-size: 0.9rem;
@@ -73,6 +68,10 @@
       <section class="login-panel">
         <h1>登录</h1>
         <form class="login-form" id="loginForm">
+          <label for="usernameInput">
+            用户名
+            <input id="usernameInput" type="text" autocomplete="username" maxlength="24" placeholder="注册时必填，登录时可不填" />
+          </label>
           <label for="emailInput">
             邮箱
             <input id="emailInput" type="email" autocomplete="email" required placeholder="name@example.com" />
@@ -84,10 +83,9 @@
           <div class="login-actions">
             <button class="login-button primary" id="loginButton" type="button">登录</button>
             <button class="login-button" id="registerButton" type="button">注册</button>
-            <button id="guestButton" type="button">游客模式</button>
-            <button class="login-button" id="logoutButton" type="button">退出</button>
+            <button class="login-button" id="guestButton" type="button">游客模式</button>
           </div>
-          <p class="login-status" id="loginStatus">第一次使用请先注册，然后登录。</p>
+          <p class="login-status" id="loginStatus">第一次使用请填写用户名、邮箱和密码后注册。</p>
         </form>
       </section>
     </main>
@@ -95,65 +93,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./site-cloud-helper.js"></script>
     <script>
+      const usernameInput = document.querySelector("#usernameInput");
       const emailInput = document.querySelector("#emailInput");
       const passwordInput = document.querySelector("#passwordInput");
       const loginStatus = document.querySelector("#loginStatus");
-
-      function getReturnTo() {
-        const params = new URLSearchParams(window.location.search);
-        return params.get("returnTo") || "./index.html";
-      }
-      
-      function setStatus(message) {
-        loginStatus.textContent = message;
-      }
-
-      function goBackToMainPage() {
-        window.location.href = getReturnTo();
-      }
-
-      document.querySelector("#registerButton").addEventListener("click", async () => {
-        const { error } = await siteCloud.register(emailInput.value.trim(), passwordInput.value);
-        if (error) {
-          setStatus(error.message);
-          return;
-        }
-        setStatus("注册成功。如果系统要求验证邮箱，请先去邮箱点确认链接，然后回来登录。");
-      });
-
-      document.querySelector("#loginButton").addEventListener("click", async () => {
-        const { error } = await siteCloud.login(emailInput.value.trim(), passwordInput.value);
-        if (error) {
-          setStatus(error.message);
-          return;
-        }
-        setStatus("登录成功，正在进入网站。");
-        window.location.href = "./index.html";
-      });
-
-      document.querySelector("#logoutButton").addEventListener("click", async () => {
-        await siteCloud.logout();
-        setStatus("已退出登录。");
-
-        goBackToMainPage();
-      });
-
-      siteCloud.currentUser().then((user) => { 
-        if (user) setStatus(`已经登录：${user.email}`);
-      });
-
-      document.querySelector("#guestButton").addEventListener("click", async () => {
-        await siteCloud.logout();
-        localStorage.setItem("site_guest_mode", "yes");
-        goBackToMainPage();
-      });
-
-      document.querySelector("#logoutButton").addEventListener("click", async () => {
-        await siteCloud.logout();
-        localStorage.removeItem("site_guest_mode");
-        setStatus("已退出登录，也已退出游客模式。");
-      });
-      
-    </script>
-  </body>
-</html>
