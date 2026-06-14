@@ -98,8 +98,17 @@
       const passwordInput = document.querySelector("#passwordInput");
       const loginStatus = document.querySelector("#loginStatus");
 
+      function getReturnTo() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get("returnTo") || "./index.html";
+      }
+      
       function setStatus(message) {
         loginStatus.textContent = message;
+      }
+
+      function goBackToMainPage() {
+        window.location.href = getReturnTo();
       }
 
       document.querySelector("#registerButton").addEventListener("click", async () => {
@@ -124,11 +133,26 @@
       document.querySelector("#logoutButton").addEventListener("click", async () => {
         await siteCloud.logout();
         setStatus("已退出登录。");
+
+        goBackToMainPage();
       });
 
-      siteCloud.currentUser().then((user) => {
+      siteCloud.currentUser().then((user) => { ///???
         if (user) setStatus(`已经登录：${user.email}`);
       });
+
+      document.querySelector("#guestButton").addEventListener("click", async () => {
+        await siteCloud.logout();
+        localStorage.setItem("site_guest_mode", "yes");
+        goBackToMainPage();
+      });
+
+      document.querySelector("#logoutButton").addEventListener("click", async () => {
+        await siteCloud.logout();
+        localStorage.removeItem("site_guest_mode");
+        setStatus("已退出登录，也已退出游客模式。");
+      });
+      
     </script>
   </body>
 </html>
