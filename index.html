@@ -7,8 +7,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>你好</title>
     <link rel="stylesheet" href="./styles.css" />
+    <style>
+      .home-top-actions {
+        position: fixed;
+        top: 18px;
+        right: 18px;
+        z-index: 10;
+      }
+
+      .profile-orb {
+        display: grid;
+        place-items: center;
+        width: 58px;
+        height: 58px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: var(--shadow);
+      }
+
+      .stick-person {
+        width: 31px;
+        height: 31px;
+      }
+
+      .home-user-line {
+        color: var(--blue);
+        font-weight: 700;
+      }
+    </style>
+    
   </head>
   <body class="home-page">
+    
+    <div class="home-top-actions">
+      <a class="profile-orb" href="./profile.html" aria-label="个人页面" title="个人页面">
+        <svg class="stick-person" viewBox="0 0 40 40" aria-hidden="true">
+          <circle cx="20" cy="9" r="5" fill="none" stroke="currentColor" stroke-width="3" />
+          <path d="M20 15v12M10 21h20M20 27l-8 9M20 27l8 9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+        </svg>
+      </a>
+    </div>
+    
     <main class="home-shell" aria-label="首页">
       <section class="hello-panel">
         <p class="eyebrow">欢迎回来</p>
@@ -25,15 +65,17 @@
     <script src="./site-cloud-helper.js"></script>
     <script>
       async function checkEntryPermission() {
-        const isGuest = localStorage.getItem("site_guest_mode") === "yes";
-        if (isGuest) return;
-    
-        const user = await siteCloud.currentUser();
-        if (user) return;
-    
-        window.location.href = "./login.html?returnTo=./index.html";
+        const profile = await siteCloud.currentProfile();
+
+        if (!profile) {
+          window.location.href = "./login.html?returnTo=./index.html";
+          return;
+        }
+
+        document.querySelector("#welcomeLine").textContent = `欢迎回来，${profile.username}`;
+        document.querySelector("#homeUserLine").textContent = profile.isGuest ? "游客模式" : "已登录账号";
       }
-  
+
       checkEntryPermission();
     </script>
   </body>
