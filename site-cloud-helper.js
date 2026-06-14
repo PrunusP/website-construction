@@ -2,8 +2,8 @@
 // 使用前需要在页面里先引入 Supabase：
 // <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-const SITE_SUPABASE_URL = "请在这里填 Supabase Project URL";
-const SITE_SUPABASE_ANON_KEY = "请在这里填 Supabase anon public key";
+const SITE_SUPABASE_URL = "https://xkxkczcomdwejsziulzp.supabase.co";
+const SITE_SUPABASE_ANON_KEY = "sb_publishable_AcVGnGDBzWTZTyVNof5ntw_warQ-j_Q";
 
 const siteCloud = (() => {
   const client = supabase.createClient(SITE_SUPABASE_URL, SITE_SUPABASE_ANON_KEY);
