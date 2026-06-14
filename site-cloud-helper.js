@@ -4,71 +4,97 @@
 
 const SITE_SUPABASE_URL = "https://xkxkczcomdwejsziulzp.supabase.co";
 const SITE_SUPABASE_ANON_KEY = "sb_publishable_AcVGnGDBzWTZTyVNof5ntw_warQ-j_Q";
+const SITE_GUEST_USERNAME = "Homo Sapien";
 
 const siteCloud = (() => {
   const client = supabase.createClient(SITE_SUPABASE_URL, SITE_SUPABASE_ANON_KEY);
+
+  function cleanUsername(username) {
+    return String(username || "").trim();
+  }
+
+  function isGuestMode() {
+    return localStorage.getItem("site_guest_mode") === "yes";
+  }
+
+  function enterGuestMode() {
+    localStorage.setItem("site_guest_mode", "yes");
+  }
+
+  function leaveGuestMode() {
+    localStorage.removeItem("site_guest_mode");
+  }
 
   async function currentUser() {
     const { data } = await client.auth.getSession();
     return data.session?.user || null;
   }
 
-  async function register(email, password) {
-    return client.auth.signUp({ email, password });
+  async function currentProfile() {
+    if (isGuestMode()) return { username: SITE_GUEST_USERNAME, isGuest: true };
+
+    const user = await currentUser();
+    if (!user) return null;
+
+    const { data, error } = await client
+      .from("profiles")
+      .select("user_id, username")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data ? { ...data, isGuest: false } : null;
   }
 
-  async function login(email, password) {
-    return client.auth.signInWithPassword({ email, password });
+  async function usernameAvailable(username) {
+    const clean = cleanUsername(username);
+    if (!clean) return false;
+
+    const { data, error } = await client
+      .from("profiles")
+      .select("username")
+      .eq("username", clean)
+      .maybeSingle();
+
+    if (error) throw error;
+    return !data;
   }
 
-  async function logout() {
-    return client.auth.signOut();
-  }
-
-  async function list(app, options = {}) {
-    let query = client
-      .from("site_items")
-      .select("*")
-      .eq("app", app)
-      .order("item_date", { ascending: false, nullsFirst: false })
-      .order("created_at", { ascending: false });
-
-    if (options.itemType) query = query.eq("item_type", options.itemType);
-    if (options.fromDate) query = query.gte("item_date", options.fromDate);
-    if (options.toDate) query = query.lt("item_date", options.toDate);
-
-    return query;
-  }
-
-  async function add(app, item) {
+  async function saveProfile(username) {
     const user = await currentUser();
     if (!user) throw new Error("请先登录");
 
-    return client.from("site_items").insert({
-      user_id: user.id,
-      app,
-      item_type: item.itemType || "item",
-      title: item.title || "",
-      data: item.data || {},
-      item_date: item.itemDate || null,
-    });
-  }
+    const clean = cleanUsername(username);
+    if (clean.length < 2 || clean.length > 24) {
+      throw new Error("用户名需要 2 到 24 个字。");
+    }
 
-  async function update(id, changes) {
-    return client
-      .from("site_items")
-      .update({
-        title: changes.title,
-        data: changes.data,
-        item_date: changes.itemDate,
+    const { data, error } = await client
+      .from("profiles")
+      .upsert({
+        user_id: user.id,
+        username: clean,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", id);
+      .select("user_id, username")
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 
-  async function remove(id) {
-    return client.from("site_items").delete().eq("id", id);
-  }
+  async function register(email, password, username) {
+    const clean = cleanUsername(username);
+    if (!clean) return { error: { message: "请填写用户名。" } };
 
-  return { client, currentUser, register, login, logout, list, add, update, remove };
-})();
+    const available = await usernameAvailable(clean);
+    if (!available) return { error: { message: "这个用户名已经有人用了，请换一个。" } };
+
+    const result = await client.auth.signUp({ email, password });
+    if (result.error) return result;
+
+    localStorage.setItem("site_pending_username", clean);
+
+    if (result.data.session?.user) {
+      try {
+        await saveProfile(clean);
