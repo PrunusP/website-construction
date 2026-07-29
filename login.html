@@ -70,11 +70,7 @@
         <form class="login-form" id="loginForm">
           <label for="usernameInput">
             用户名
-            <input id="usernameInput" type="text" autocomplete="username" maxlength="24" placeholder="注册时必填，登录时可不填" />
-          </label>
-          <label for="emailInput">
-            邮箱
-            <input id="emailInput" type="email" autocomplete="email" required placeholder="name@example.com" />
+            <input id="usernameInput" type="text" autocomplete="username" maxlength="24"/>
           </label>
           <label for="passwordInput">
             密码
@@ -82,10 +78,10 @@
           </label>
           <div class="login-actions">
             <button class="login-button primary" id="loginButton" type="button">登录</button>
-            <button class="login-button" id="registerButton" type="button">注册</button>
+            <button class="login-button" id="registerButton" type="button" href="./register.html">注册</button>
             <button class="login-button" id="guestButton" type="button">游客模式</button>
           </div>
-          <p class="login-status" id="loginStatus">第一次使用请填写用户名、邮箱和密码后注册。</p>
+          <p class="login-status" id="loginStatus">第一次使用请注册。</p>
         </form>
       </section>
     </main>
