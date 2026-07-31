@@ -13,7 +13,7 @@
 
       <section class="input-box">
         <label>
-          1. 选择开支还是收入
+          1. 选择开支/收入
           <select id="type">
             <option value="income">收入</option>
             <option value="expense">开支</option>
@@ -30,13 +30,13 @@
         </label>
 
         <label>
-          2. 填金额
+          2. 填写金额
           <input id="amount" type="number" min="0.01" step="0.01" placeholder="例如：100" />
         </label>
 
         <label>
-          3. 写原因
-          <input id="reason" type="text" placeholder="例如：妈妈打赏" />
+          3. 填写原因
+          <input id="reason" type="text" placeholder="例如：零花钱" />
         </label>
 
         <button id="addBtn">添加</button>
@@ -44,19 +44,19 @@
 
       <section class="accounts">
         <div class="account-box" data-account="short">
-          <div class="account-title">短期：xxx（<span class="money" id="shortMoney">0</span>）</div>
+          <div class="account-title">短期：<span class="money" id="shortMoney">0</span></div>
           <div class="records" id="shortRecords"></div>
           <button class="open-button">›</button>
         </div>
 
         <div class="account-box" data-account="long">
-          <div class="account-title">长期：xxx（<span class="money" id="longMoney">0</span>）</div>
+          <div class="account-title">长期：<span class="money" id="longMoney">0</span></div>
           <div class="records" id="longRecords"></div>
           <button class="open-button">›</button>
         </div>
 
         <div class="account-box" data-account="saving">
-          <div class="account-title">存款：xxx（<span class="money" id="savingMoney">0</span>）</div>
+          <div class="account-title">存款：<span class="money" id="savingMoney">0</span></div>
           <div class="records" id="savingRecords"></div>
           <button class="open-button">›</button>
         </div>
