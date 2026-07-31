@@ -97,3 +97,12 @@
         </form>
       </section>
     </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../site-cloud-helper.js"></script>
+<script>
+  document.querySelector("#logoutButton").addEventListener("click", async () => {
+    await siteCloud.logout();
+    window.location.href = "./login.html";
+  });
+</script>
