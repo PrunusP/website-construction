@@ -39,26 +39,26 @@
           <input id="reason" type="text" placeholder="例如：零花钱" />
         </label>
 
-        <button id="addBtn">添加</button>
+        <button id="addBtn" type="button">添加</button>
       </section>
 
       <section class="accounts">
         <div class="account-box" data-account="short">
           <div class="account-title">短期：<span class="money" id="shortMoney">0</span></div>
           <div class="records" id="shortRecords"></div>
-          <button class="open-button">›</button>
+          <button class="open-button" type="button">›</button>
         </div>
 
         <div class="account-box" data-account="long">
           <div class="account-title">长期：<span class="money" id="longMoney">0</span></div>
           <div class="records" id="longRecords"></div>
-          <button class="open-button">›</button>
+          <button class="open-button" type="button">›</button>
         </div>
 
         <div class="account-box" data-account="saving">
           <div class="account-title">存款：<span class="money" id="savingMoney">0</span></div>
           <div class="records" id="savingRecords"></div>
-          <button class="open-button">›</button>
+          <button class="open-button" type="button">›</button>
         </div>
       </section>
 
@@ -83,17 +83,141 @@
       const addBtn = document.getElementById("addBtn");
 
       async function requireLogin() {
-        const user = await siteCloud.currentUser();
-        if (!user) {
-          window.location.href = "../login.html";
+        const profile = await siteCloud.currentProfile();
+        if (!profile) {
+          window.location.href = "../login.html?returnTo=./ledger/";
           return null;
         }
-        return user;
+
+        if (profile.isGuest) {
+          alert("游客模式不能保存云端记账数据，请先注册或登录。");
+          window.location.href = "../login.html?returnTo=./ledger/";
+          return null;
+        }
+
+        return profile;
+      }
+
+      function resetLocalData() {
+        data.short = { money: 0, records: [] };
+        data.long = { money: 0, records: [] };
+        data.saving = { money: 0, records: [] };
       }
 
       async function loadCloudRecords() {
         const { data: rows, error } = await siteCloud.list("ledger", { itemType: "record" });
+
         if (error) {
           alert(error.message);
           return;
         }
+
+        resetLocalData();
+
+        const sortedRows = [...rows].reverse();
+
+        for (const row of sortedRows) {
+          const item = row.data;
+          const account = item.account;
+          const amount = Number(item.amount);
+
+          if (!data[account]) continue;
+
+          if (item.type === "income") {
+            data[account].money += amount;
+          } else {
+            data[account].money -= amount;
+          }
+
+          data[account].records.unshift({
+            id: row.id,
+            type: item.type,
+            amount,
+            afterMoney: data[account].money,
+            reason: item.reason,
+          });
+        }
+
+        render();
+      }
+
+      addBtn.addEventListener("click", async function () {
+        const type = typeInput.value;
+        const account = accountInput.value;
+        const amount = Number(amountInput.value);
+        const reason = reasonInput.value.trim();
+
+        if (!amount || amount <= 0) {
+          alert("请填写正确的金额");
+          return;
+        }
+
+        if (!reason) {
+          alert("请填写原因");
+          return;
+        }
+
+        const { error } = await siteCloud.add("ledger", {
+          itemType: "record",
+          title: reason,
+          itemDate: new Date().toISOString().slice(0, 10),
+          data: { type, account, amount, reason },
+        });
+
+        if (error) {
+          alert(error.message);
+          return;
+        }
+
+        amountInput.value = "";
+        reasonInput.value = "";
+        await loadCloudRecords();
+      });
+
+      document.querySelectorAll(".open-button").forEach(function (button) {
+        button.addEventListener("click", function () {
+          button.closest(".account-box").classList.toggle("open");
+        });
+      });
+
+      function render() {
+        renderAccount("short", "shortMoney", "shortRecords");
+        renderAccount("long", "longMoney", "longRecords");
+        renderAccount("saving", "savingMoney", "savingRecords");
+      }
+
+      function renderAccount(account, moneyId, recordsId) {
+        document.getElementById(moneyId).textContent = data[account].money;
+
+        const recordsBox = document.getElementById(recordsId);
+        const records = data[account].records;
+
+        if (records.length === 0) {
+          recordsBox.innerHTML = '<div class="empty">还没有记账</div>';
+          return;
+        }
+
+        recordsBox.innerHTML = records
+          .map(function (item) {
+            const sign = item.type === "income" ? "+" : "-";
+            const className = item.type === "income" ? "plus" : "minus";
+
+            return `
+              <div class="record">
+                <span class="${className}">
+                  ${sign}${item.amount}（${item.afterMoney}）
+                </span>
+                ${item.reason}
+              </div>
+            `;
+          })
+          .join("");
+      }
+
+      requireLogin().then(function (profile) {
+        if (!profile) return;
+        loadCloudRecords();
+      });
+    </script>
+  </body>
+</html>
