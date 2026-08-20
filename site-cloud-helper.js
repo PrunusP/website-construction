@@ -99,3 +99,5 @@ const siteCloud = (() => {
     if (result.data.session?.user) {
       try {
         await saveProfile(clean);
+      }
+    }
