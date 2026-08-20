@@ -94,6 +94,7 @@ const siteCloud = (() => {
     if (result.error) return result;
 
     localStorage.setItem("site_pending_username", clean);
+  }
 
     if (result.data.session?.user) {
       try {
