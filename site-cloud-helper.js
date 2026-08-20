@@ -4,7 +4,6 @@
 
 const SITE_SUPABASE_URL = "https://xkxkczcomdwejsziulzp.supabase.co";
 const SITE_SUPABASE_ANON_KEY = "sb_publishable_AcVGnGDBzWTZTyVNof5ntw_warQ-j_Q";
-const SITE_GUEST_USERNAME = "Homo Sapien";
 
 const siteCloud = (() => {
   const client = supabase.createClient(SITE_SUPABASE_URL, SITE_SUPABASE_ANON_KEY);
@@ -12,26 +11,13 @@ const siteCloud = (() => {
   function cleanUsername(username) {
     return String(username || "").trim();
   }
-
-  function isGuestMode() {
-    return localStorage.getItem("site_guest_mode") === "yes";
-  }
-
-  function enterGuestMode() {
-    localStorage.setItem("site_guest_mode", "yes");
-  }
-
-  function leaveGuestMode() {
-    localStorage.removeItem("site_guest_mode");
-  }
-
+  
   async function currentUser() {
     const { data } = await client.auth.getSession();
     return data.session?.user || null;
   }
 
   async function currentProfile() {
-    if (isGuestMode()) return { username: SITE_GUEST_USERNAME, isGuest: true };
 
     const user = await currentUser();
     if (!user) return null;
