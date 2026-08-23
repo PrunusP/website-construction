@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+
+    <title>注册</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <main class="login-shell">
+      <section class="login-panel">
+        <h1>注册账号</h1>
+
+        <form class="login-form" id="registerForm">
+          <label for="emailInput">
+            邮箱
+            <input
+              id="emailInput"
+              name="email"
+              type="email"
+              autocomplete="email"
+              maxlength="254"
+              placeholder="example@email.com"
+              required
+            />
+          </label>
+
+          <label for="passwordInput">
+            密码
+            <input
+              id="passwordInput"
+              name="password"
+              type="password"
+              autocomplete="new-password"
+              minlength="6"
+              placeholder="至少 6 位"
+              required
+            />
+          </label>
+
+          <label for="confirmPasswordInput">
+            确认密码
+            <input
+              id="confirmPasswordInput"
+              name="confirmPassword"
+              type="password"
+              autocomplete="new-password"
+              minlength="6"
+              placeholder="再次输入密码"
+              required
+            />
+          </label>
+
+          <p
+            id="registerMessage"
+            role="status"
+            aria-live="polite"
+          ></p>
+
+          <div class="login-actions">
+            <button
+              class="login-button primary"
+              id="registerButton"
+              type="submit"
+            >
+              注册
+            </button>
+
+            <a
+              href="./login.html"
+              aria-label="返回登录"
+              title="返回登录"
+            >
+              已有账号？登录
+            </a>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./site-cloud-helper.js"></script>
+
+    <script>
+      const registerForm =
+        document.getElementById("registerForm");
+
+      const emailInput =
+        document.getElementById("emailInput");
+
+      const passwordInput =
+        document.getElementById("passwordInput");
+
+      const confirmPasswordInput =
+        document.getElementById("confirmPasswordInput");
+
+      const registerButton =
+        document.getElementById("registerButton");
+
+      const registerMessage =
+        document.getElementById("registerMessage");
+
+      registerForm.addEventListener(
+        "submit",
+        async function (event) {
+          event.preventDefault();
+
+          const email = emailInput.value.trim();
+          const password = passwordInput.value;
+          const confirmPassword =
+            confirmPasswordInput.value;
+
+          registerMessage.textContent = "";
+
+          // 先在浏览器中检查两次密码是否一致
+          if (password !== confirmPassword) {
+            registerMessage.textContent =
+              "两次输入的密码不一致。";
+
+            confirmPasswordInput.focus();
+            return;
+          }
+
+          if (password.length < 6) {
+            registerMessage.textContent =
+              "密码不能少于 6 位。";
+
+            passwordInput.focus();
+            return;
+          }
+
+          registerButton.disabled = true;
+          registerMessage.textContent =
+            "正在创建账号……";
+
+          try {
+            const { data, error } =
+              await window.siteSupabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                  // 验证邮箱后返回的地址
+                  emailRedirectTo: new URL(
+                    "./index.html",
+                    window.location.href
+                  ).href
+                }
+              });
+
+            if (error) {
+              throw error;
+            }
+
+            /*
+             * 如果 Supabase 关闭了邮箱验证：
+             * 注册成功后会直接获得 session。
+             */
+            if (data.session) {
+              registerMessage.textContent =
+                "注册成功，正在进入首页……";
+
+              window.location.replace("./index.html");
+              return;
+            }
+
+            /*
+             * 如果 Supabase 开启了邮箱验证：
+             * 注册成功后通常暂时没有 session，
+             * 用户需要先点击验证邮件中的链接。
+             */
+            registerMessage.textContent =
+              "注册申请已提交，请前往邮箱完成验证。";
+
+            registerForm.reset();
+          } catch (error) {
+            console.error("注册失败：", error);
+
+            registerMessage.textContent =
+              getRegisterErrorMessage(error);
+
+            registerButton.disabled = false;
+          }
+        }
+      );
+
+      function getRegisterErrorMessage(error) {
+        const message =
+          String(error?.message || "").toLowerCase();
+
+        if (
+          message.includes("already registered") ||
+          message.includes("already exists")
+        ) {
+          return "这个邮箱可能已经注册，请尝试登录。";
+        }
+
+        if (message.includes("password")) {
+          return "密码不符合安全要求。";
+        }
+
+        if (
+          message.includes("email") &&
+          message.includes("invalid")
+        ) {
+          return "请输入有效的邮箱地址。";
+        }
+
+        if (
+          message.includes("rate") ||
+          message.includes("too many")
+        ) {
+          return "请求次数过多，请稍后再试。";
+        }
+
+        return "注册失败，请稍后重试。";
+      }
+    </script>
+  </body>
+</html>
