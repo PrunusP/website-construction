@@ -1,11 +1,11 @@
-##现在已有：
+## 现在已有：
 
-##首页 ./index.html
+## 首页 ./index.html
 未登录时显示空页面、Login 按钮
 登录时显示正常页面、Logout 按钮
 
-##登录 ./login.html
+## 登录 ./login.html
 能通过邮箱，密码登录账号，并储存账号信息，在本地保留登录状态
 
-##论坛 forum
+## 论坛 forum
 
