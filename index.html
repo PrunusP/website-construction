@@ -1,70 +1,98 @@
 <!doctype html>
 <html lang="zh-CN">
+
   <head>
-      
-    
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>你好</title>
     <link rel="stylesheet" href="./styles.css" />
-    <style>
-      .home-top-actions {
-        position: fixed;
-        top: 18px;
-        right: 18px;
-        z-index: 10;
-      }
-
-      .stick-person {
-        width: 31px;
-        height: 31px;
-      }
-
-      .home-user-line {
-        color: var(--blue);
-        font-weight: 700;
-      }
-    </style>
-    
   </head>
+
   <body class="home-page">
+
+
+      <div id="loggedInView" hidden>
+          <div class="home-top-actions">
+          <button id="LogoutButton" type="button">
+            Logout
+          </button>
+        </div>
+
+          <main class="home-shell" aria-label="首页">
+          <section class="hello-panel">
+            <h1>你好 </h1>
+            <nav class="home-actions" aria-label="功能入口">
+              <a class="home-card" href="./forum/index.html">
+                <span>论坛</span>
+              </a>
+            </nav>
+          </section>
+
+        </main>
+      </div>
+  
     
-    <div class="home-top-actions">
-      <a href="./profile/index.html" aria-label="个人页面" title="个人页面">
-        个人页面
-      </a>
-    </div>
+      <div id="loggedOutView" hidden>
+        <div class="home-top-actions">
+        <a href="./login.html" aria-label="Login" title="Login">
+          Login
+        </a>
+      </div>
+
+        <main class="home-shell" aria-label ="首页">
+          <h2>Seems like there is nothing here.</h2>
+        </main>
+      </div>
     
-    <main class="home-shell" aria-label="首页">
-      <section class="hello-panel">
-        <p class="eyebrow">欢迎回来</p>
-        <h1>你好</h1>
-        <nav class="home-actions" aria-label="功能入口">
-          <a class="home-card" href="./ledger/index.html">
-            <span>记账本</span>
-          </a>
-          <a class="home-card" href="./forum/index.html">
-            <span>论坛</span>
-          </a>
-        </nav>
-      </section>
-    </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="./site-cloud-helper.js"></script>
-    <script>
-      async function checkEntryPermission() {
-        const profile = await siteCloud.currentProfile();
-
-        if (!profile) {
-          window.location.href = "./profile/login.html?returnTo=./index.html";
-          return;
-        }
-
-        document.querySelector("#welcomeLine").textContent = `欢迎回来，${profile.username}`;
-      }
-
-      checkEntryPermission();
-    </script>
   </body>
 </html>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./site-cloud-helper.js"></script>
+
+<script>
+
+  //判断是否登录
+
+  const loggedInView = document.getElementById("loggedInView");
+  const loggedOutView = document.getElementById("loggedOutView");
+  const logoutButton = document.getElementById("logoutButton");
+
+  async function renderHomePage() {
+    const { data, error } =
+      await window.siteSupabase.auth.getSession();
+
+    if (error) {
+      console.error("读取登录状态失败：", error);
+    }
+
+    const isLoggedIn = Boolean(data?.session);
+
+    if (isLoggedIn) {
+      loggedInView.hidden = false;
+    } 
+    else {
+      loggedOutView.hidden = false;
+    }
+  }
+
+  logoutButton.addEventListener("click", async function () {
+    logoutButton.disabled = true;
+
+    const { error } =
+      await window.siteSupabase.auth.signOut({
+        scope: "local"
+      });
+
+    if (error) {
+      console.error("退出登录失败：", error);
+      logoutButton.disabled = false;
+      return;
+    }
+
+    window.location.reload();
+  });
+
+  renderHomePage();
+</script>
