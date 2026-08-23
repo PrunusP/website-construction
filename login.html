@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+
+    <title>登录</title>
+
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <main class="login-shell">
+      <section class="login-panel">
+        <h1>登录</h1>
+
+        <form class="login-form" id="loginForm">
+          <label for="emailInput">
+            邮箱
+            <input
+              id="emailInput"
+              type="email"
+              autocomplete="username"
+              maxlength="254"
+              required
+            />
+          </label>
+
+          <label for="passwordInput">
+            密码
+            <input
+              id="passwordInput"
+              type="password"
+              autocomplete="current-password"
+              required
+              minlength="6"
+              placeholder="至少 6 位"
+            />
+          </label>
+
+          <p id="loginMessage" role="status" aria-live="polite"></p>
+
+          <div class="login-actions">
+            <button
+              class="login-button primary"
+              id="loginButton"
+              type="submit"
+            >
+              登录
+            </button>
+
+            <a>
+              href="./register.html"
+              aria-label="Register"
+              title="Register"
+              注册
+            </a>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./site-cloud-helper.js"></script>
+
+    //登录 
+    <script>
+      const loginForm = document.getElementById("loginForm");
+      const emailInput = document.getElementById("emailInput");
+      const passwordInput = document.getElementById("passwordInput");
+      const loginButton = document.getElementById("loginButton");
+      const loginMessage = document.getElementById("loginMessage");
+
+      loginForm.addEventListener("submit", async function (event) {
+        // 阻止表单刷新当前页面
+        event.preventDefault();
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        loginMessage.textContent = "正在登录……";
+        loginButton.disabled = true;
+
+        try {
+          const { data, error } =
+            await window.siteSupabase.auth.signInWithPassword({
+              email: email,
+              password: password
+            });
+
+          if (error) {
+            throw error;
+          }
+
+          if (!data.session) {
+            throw new Error("没有获得登录会话");
+          }
+
+          loginMessage.textContent = "登录成功，正在跳转……";
+
+          // replace 可以防止用户点击“后退”回到登录页面
+          window.location.replace("./index.html");
+        } catch (error) {
+          console.error("登录失败：", error);
+
+          loginMessage.textContent =
+            "登录失败，请检查邮箱和密码。";
+
+          loginButton.disabled = false;
+        }
+      });
+
+      // 如果打开登录页时已经登录，直接返回首页
+      async function redirectLoggedInUser() {
+        const { data, error } =
+          await window.siteSupabase.auth.getSession();
+
+        if (error) {
+          console.error("读取登录状态失败：", error);
+          return;
+        }
+
+        if (data.session) {
+          window.location.replace("./index.html");
+        }
+      }
+
+      redirectLoggedInUser();
+    </script>
+  </body>
+</html>
