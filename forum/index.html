@@ -279,8 +279,7 @@
 
       loadCurrentUser();
     </script>
-  </body>
-</html>
+  
 
 <script>
   /*
@@ -478,15 +477,15 @@
     openText.className = "forum-post-open";
     openText.textContent = "查看讨论 ›";
 
-    footer.append(author, openLink);
+    footer.append(author, openText);
 
-    article.append(
+    card.append(
       heading,
       tagsContainer,
       footer
     );
 
-    return article;
+    return card;
   }
   
   /*
@@ -516,3 +515,6 @@
 
   loadForumPosts();
 </script>
+
+</body>
+</html>
