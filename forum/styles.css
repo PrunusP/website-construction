@@ -33,6 +33,11 @@ html {
   scroll-behavior: smooth;
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
 .forum-page {
   min-height: 100vh;
   overflow-x: hidden;
@@ -70,7 +75,7 @@ html {
 
 .forum-section-card {
   display: grid;
-  grid-template-columns: 54px 1fr auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 18px;
   min-height: 116px;
@@ -367,4 +372,9 @@ html {
   .forum-start-button {
     transition: none;
   }
+}
+
+
+#physics {
+  scroll-margin-top: 24px;
 }
