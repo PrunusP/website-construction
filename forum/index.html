@@ -1,1 +1,283 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
 
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+
+    <title>论坛</title>
+
+    <!-- 因为当前文件在 forum 文件夹中，所以要返回上一级 -->
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+
+  <body class="forum-page">
+    <main class="forum-shell">
+      <header class="forum-hero">
+        <p class="eyebrow">COMMUNITY</p>
+        <h1>欢迎来到论坛</h1>
+
+        <p class="forum-description">
+          在这里分享想法、提出问题，并参与社区讨论。
+        </p>
+      </header>
+
+      <!-- 不同的论坛区域 -->
+      <section class="forum-sections" aria-label="论坛区域">
+        <article class="forum-section-card" id="general">
+          <span class="forum-section-number">01</span>
+
+          <div>
+            <h2>综合讨论</h2>
+            <p>分享想法，以及讨论各种有趣的话题。</p>
+          </div>
+
+          <span class="forum-card-arrow" aria-hidden="true">
+            ›
+          </span>
+        </article>
+
+        <article class="forum-section-card" id="help">
+          <span class="forum-section-number">02</span>
+
+          <div>
+            <h2>问题与帮助</h2>
+            <p>提出问题，或者帮助其他社区成员。</p>
+          </div>
+
+          <span class="forum-card-arrow" aria-hidden="true">
+            ›
+          </span>
+        </article>
+
+        <article class="forum-section-card" id="showcase">
+          <span class="forum-section-number">03</span>
+
+          <div>
+            <h2>作品展示</h2>
+            <p>展示你的项目、作品以及最新发现。</p>
+          </div>
+
+          <span class="forum-card-arrow" aria-hidden="true">
+            ›
+          </span>
+        </article>
+      </section>
+    </main>
+
+    <!-- 右侧抽屉 -->
+    <aside
+      class="forum-drawer"
+      id="forumDrawer"
+      aria-label="论坛导航"
+    >
+      <!-- 侧栏把手 -->
+      <button
+        class="forum-drawer-handle"
+        id="drawerButton"
+        type="button"
+        aria-label="打开论坛导航"
+        aria-expanded="false"
+        aria-controls="drawerContent"
+      >
+        <span aria-hidden="true">‹</span>
+      </button>
+
+      <div
+        class="forum-drawer-content"
+        id="drawerContent"
+      >
+        <div class="forum-user">
+          <span class="forum-user-label">
+            当前账号
+          </span>
+
+          <!-- 用户邮箱由 JavaScript 写入 -->
+          <strong id="userGreeting">
+            Hi, 正在读取……
+          </strong>
+        </div>
+
+        <a
+          class="forum-start-button"
+          id="startDiscussionButton"
+          href="./new-discussion.html"
+        >
+          <span>Start a discussion</span>
+          <span aria-hidden="true">＋</span>
+        </a>
+
+        <nav
+          class="forum-drawer-navigation"
+          aria-label="前往不同区域"
+        >
+          <span class="forum-navigation-title">
+            论坛区域
+          </span>
+
+          <a href="#general">
+            <span>综合讨论</span>
+            <span aria-hidden="true">01</span>
+          </a>
+
+          <a href="#help">
+            <span>问题与帮助</span>
+            <span aria-hidden="true">02</span>
+          </a>
+
+          <a href="#showcase">
+            <span>作品展示</span>
+            <span aria-hidden="true">03</span>
+          </a>
+        </nav>
+
+        <a class="forum-home-button" href="../index.html">
+          <span aria-hidden="true">←</span>
+          <span>返回首页</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Supabase 必须先加载 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- forum/index.html 位于子文件夹，所以使用 ../ -->
+    <script src="../site-cloud-helper.js"></script>
+
+    <script>
+      const forumDrawer =
+        document.getElementById("forumDrawer");
+
+      const drawerButton =
+        document.getElementById("drawerButton");
+
+      const userGreeting =
+        document.getElementById("userGreeting");
+
+      const startDiscussionButton =
+        document.getElementById(
+          "startDiscussionButton"
+        );
+
+      function setDrawerOpen(isOpen) {
+        forumDrawer.classList.toggle(
+          "is-open",
+          isOpen
+        );
+
+        drawerButton.setAttribute(
+          "aria-expanded",
+          String(isOpen)
+        );
+
+        drawerButton.setAttribute(
+          "aria-label",
+          isOpen
+            ? "关闭论坛导航"
+            : "打开论坛导航"
+        );
+
+        drawerButton
+          .querySelector("span")
+          .textContent = isOpen ? "›" : "‹";
+      }
+
+      // 点击右侧把手时切换打开状态
+      drawerButton.addEventListener(
+        "click",
+        function () {
+          const isOpen =
+            forumDrawer.classList.contains(
+              "is-open"
+            );
+
+          setDrawerOpen(!isOpen);
+        }
+      );
+
+      // 点击侧栏外面时关闭侧栏
+      document.addEventListener(
+        "pointerdown",
+        function (event) {
+          if (
+            forumDrawer.classList.contains(
+              "is-open"
+            ) &&
+            !forumDrawer.contains(event.target)
+          ) {
+            setDrawerOpen(false);
+          }
+        }
+      );
+
+      // 按 Escape 键关闭侧栏
+      document.addEventListener(
+        "keydown",
+        function (event) {
+          if (event.key === "Escape") {
+            setDrawerOpen(false);
+            drawerButton.focus();
+          }
+        }
+      );
+
+      async function loadCurrentUser() {
+        try {
+          const {
+            data: { user },
+            error
+          } =
+            await window.siteSupabase.auth.getUser();
+
+          if (error) {
+            throw error;
+          }
+
+          if (!user) {
+            userGreeting.textContent =
+              "Hi, 访客";
+
+            /*
+             * 未登录时，点击发起讨论按钮会前往登录页。
+             */
+            startDiscussionButton.href =
+              "../login.html";
+
+            startDiscussionButton
+              .querySelector("span")
+              .textContent = "登录后发起讨论";
+
+            return;
+          }
+
+          /*
+           * 使用 textContent 写入邮箱，
+           * 不使用 innerHTML，避免把邮箱当作 HTML 解析。
+           */
+          userGreeting.textContent =
+            `Hi, ${user.email ?? "用户"}`;
+        } catch (error) {
+          console.error(
+            "读取论坛用户失败：",
+            error
+          );
+
+          userGreeting.textContent =
+            "Hi, 访客";
+
+          startDiscussionButton.href =
+            "../login.html";
+
+          startDiscussionButton
+            .querySelector("span")
+            .textContent = "登录后发起讨论";
+        }
+      }
+
+      loadCurrentUser();
+    </script>
+  </body>
+</html>

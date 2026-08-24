@@ -1,0 +1,370 @@
+:root {
+  color-scheme: light;
+  --ink: #19212a;
+  --muted: #66717e;
+  --line: #d9e0e6;
+  --paper: #ffffff;
+  --bg: #f4f6f1;
+  --green: #18805c;
+  --red: #c84b45;
+  --blue: #2f6fb4;
+  --amber: #c68521;
+  --shadow: 0 18px 45px rgba(25, 33, 42, 0.08);
+}
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    linear-gradient(90deg, rgba(47, 111, 180, 0.08) 0 1px, transparent 1px 100%),
+    linear-gradient(0deg, rgba(24, 128, 92, 0.08) 0 1px, transparent 1px 100%),
+    var(--bg);
+  background-size: 32px 32px;
+  color: var(--ink);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Microsoft YaHei", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.forum-page {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.forum-shell {
+  width: min(940px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: clamp(70px, 10vw, 130px) 0 80px;
+}
+
+.forum-hero {
+  max-width: 820px;
+}
+
+.forum-hero h1 {
+  max-width: 800px;
+  font-size: clamp(3.5rem, 10vw, 7.5rem);
+  line-height: 0.95;
+}
+
+.forum-description {
+  max-width: 600px;
+  margin: 28px 0 0;
+  color: var(--muted);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1.7;
+}
+
+.forum-sections {
+  display: grid;
+  gap: 12px;
+  margin-top: clamp(60px, 9vw, 110px);
+}
+
+.forum-section-card {
+  display: grid;
+  grid-template-columns: 54px 1fr auto;
+  align-items: center;
+  gap: 18px;
+  min-height: 116px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow);
+  padding: 22px 24px;
+  scroll-margin-top: 24px;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.forum-section-card:hover {
+  border-color: var(--blue);
+  transform: translateY(-2px);
+  box-shadow:
+    0 22px 50px rgba(25, 33, 42, 0.12);
+}
+
+.forum-section-number {
+  align-self: start;
+  color: var(--blue);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.forum-section-card h2 {
+  font-size: clamp(1.1rem, 3vw, 1.45rem);
+}
+
+.forum-section-card p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.forum-card-arrow {
+  color: var(--muted);
+  font-size: 2rem;
+  transition: transform 160ms ease;
+}
+
+.forum-section-card:hover .forum-card-arrow {
+  transform: translateX(4px);
+}
+
+/* ================================
+   Right drawer
+   ================================ */
+
+.forum-drawer {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  right: 0;
+  width: min(360px, calc(100vw - 28px));
+  height: 100vh;
+  height: 100dvh;
+  border-left: 1px solid var(--line);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(47, 111, 180, 0.06),
+      transparent 35%
+    ),
+    rgba(255, 255, 255, 0.98);
+  box-shadow:
+    -18px 0 45px rgba(25, 33, 42, 0.1);
+
+  /*
+   * 默认只留下 26px 宽的区域。
+   * 鼠标放到它上面时，整个侧栏会滑出来。
+   */
+  transform: translateX(calc(100% - 26px));
+  transition: transform 260ms ease;
+}
+
+/*
+ * 鼠标悬停、键盘聚焦或者点击打开时，
+ * 都显示完整侧栏。
+ */
+.forum-drawer:hover,
+.forum-drawer:focus-within,
+.forum-drawer.is-open {
+  transform: translateX(0);
+}
+
+.forum-drawer-handle {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 26px;
+  height: 100%;
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  transform: translateY(-50%);
+}
+
+.forum-drawer-handle span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: 18px;
+  height: 64px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px 0 0 8px;
+  background: var(--paper);
+  box-shadow:
+    -8px 0 20px rgba(25, 33, 42, 0.08);
+  font-size: 1.5rem;
+  transform: translate(-100%, -50%);
+}
+
+.forum-drawer-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 34px 26px 26px 50px;
+  overflow-y: auto;
+}
+
+.forum-user {
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.forum-user-label,
+.forum-navigation-title {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.forum-user strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.1rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.forum-start-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 58px;
+  margin-top: 24px;
+  border: 1px solid var(--ink);
+  border-radius: 8px;
+  background: var(--ink);
+  color: #fff;
+  padding: 0 17px;
+  font-weight: 800;
+  transition:
+    transform 160ms ease,
+    background 160ms ease;
+}
+
+.forum-start-button:hover {
+  background: var(--blue);
+  transform: translateY(-1px);
+}
+
+.forum-start-button span:last-child {
+  font-size: 1.35rem;
+}
+
+.forum-drawer-navigation {
+  display: grid;
+  gap: 8px;
+  margin-top: 34px;
+}
+
+.forum-navigation-title {
+  margin-bottom: 6px;
+}
+
+.forum-drawer-navigation a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-weight: 700;
+  transition:
+    color 160ms ease,
+    padding 160ms ease;
+}
+
+.forum-drawer-navigation a:hover {
+  color: var(--blue);
+  padding-left: 6px;
+}
+
+.forum-drawer-navigation a span:last-child {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.forum-home-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  margin-top: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 0 14px;
+  font-weight: 700;
+}
+
+.forum-home-button:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+/* 清晰的键盘焦点样式 */
+.forum-drawer a:focus-visible,
+.forum-drawer button:focus-visible {
+  outline: 3px solid rgba(47, 111, 180, 0.3);
+  outline-offset: 3px;
+}
+
+/* ================================
+   Responsive
+   ================================ */
+
+@media (max-width: 620px) {
+  .forum-shell {
+    width: min(100% - 32px, 540px);
+    padding-top: 60px;
+  }
+
+  .forum-hero h1 {
+    font-size: clamp(3.1rem, 18vw, 5rem);
+  }
+
+  .forum-section-card {
+    grid-template-columns: 38px 1fr;
+    min-height: 104px;
+    padding: 18px;
+  }
+
+  .forum-card-arrow {
+    display: none;
+  }
+
+  .forum-drawer {
+    width: min(330px, calc(100vw - 18px));
+  }
+
+  /*
+   * 手机没有可靠的 hover，
+   * 默认仅显示把手，通过点击打开。
+   */
+  .forum-drawer:not(.is-open) {
+    transform: translateX(calc(100% - 20px));
+  }
+
+  .forum-drawer-handle {
+    width: 20px;
+  }
+
+  .forum-drawer-content {
+    padding:
+      max(24px, env(safe-area-inset-top))
+      20px
+      max(20px, env(safe-area-inset-bottom))
+      40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .forum-drawer,
+  .forum-section-card,
+  .forum-card-arrow,
+  .forum-start-button {
+    transition: none;
+  }
+}
