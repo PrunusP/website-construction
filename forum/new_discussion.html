@@ -1,1 +1,401 @@
 
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+
+    <title>发起讨论</title>
+
+    <!-- 当前文件位于 forum 文件夹中 -->
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+
+  <body class="discussion-editor-page">
+    <main class="discussion-editor-shell">
+      <header class="discussion-editor-header">
+        <p class="eyebrow">NEW DISCUSSION</p>
+        <h1>发起讨论</h1>
+
+        <p>
+          选择正确的区域和标签，可以让其他用户更容易找到你的讨论。
+        </p>
+      </header>
+
+      <form
+        class="discussion-form"
+        id="discussionForm"
+      >
+        <!-- 标题 -->
+        <label class="discussion-field">
+          <span>Title</span>
+
+          <input
+            id="titleInput"
+            name="title"
+            type="text"
+            minlength="4"
+            maxlength="120"
+            placeholder="用一句话描述你想讨论的内容"
+            required
+          />
+
+          <small>
+            标题长度为 4～120 个字符
+          </small>
+        </label>
+
+        <!-- 区域 -->
+        <label class="discussion-field">
+          <span>区域</span>
+
+          <select
+            id="categorySelect"
+            name="category"
+            required
+          >
+            <option value="">
+              请选择一个区域
+            </option>
+
+            <option value="physics">
+              物理区
+            </option>
+
+            <option value="math">
+              数学区
+            </option>
+
+            <option value="computer">
+              计算机区
+            </option>
+
+            <option value="general">
+              综合讨论区
+            </option>
+          </select>
+        </label>
+
+        <!-- 标签 -->
+        <fieldset
+          class="discussion-tags-field"
+          id="tagsField"
+          disabled
+        >
+          <legend>Tags</legend>
+
+          <p id="tagsHelp">
+            请先选择一个区域
+          </p>
+
+          <!-- JavaScript 会在这里生成标签 -->
+          <div
+            class="discussion-tags"
+            id="tagsContainer"
+          ></div>
+        </fieldset>
+
+        <!-- 正文 -->
+        <label class="discussion-field">
+          <span>讨论内容</span>
+
+          <textarea
+            id="contentInput"
+            name="content"
+            minlength="10"
+            maxlength="5000"
+            rows="14"
+            placeholder="详细描述你的问题、想法或解题过程……"
+            required
+          ></textarea>
+
+          <small>
+            最多 5000 个字符
+          </small>
+        </label>
+
+        <p
+          class="discussion-message"
+          id="discussionMessage"
+          role="status"
+          aria-live="polite"
+        ></p>
+
+        <div class="discussion-actions">
+          <a
+            class="discussion-cancel-button"
+            href="./index.html"
+          >
+            取消并返回
+          </a>
+
+          <button
+            class="discussion-submit-button"
+            id="submitButton"
+            type="submit"
+          >
+            提交讨论
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../site-cloud-helper.js"></script>
+
+    <script>
+      /*
+       * 每个区域允许使用的固定标签。
+       *
+       * 左边是数据库保存的值，
+       * 右边是展示给用户的中文。
+       */
+      const tagsByCategory = {
+        physics: [
+          { value: "mechanics", label: "力学" },
+          { value: "electromagnetism", label: "电磁学" },
+          { value: "optics", label: "光学" },
+          { value: "thermodynamics", label: "热学" },
+          { value: "quantum", label: "量子物理" },
+          { value: "solution", label: "题解" }
+        ],
+
+        math: [
+          { value: "algebra", label: "代数" },
+          { value: "geometry", label: "几何" },
+          { value: "calculus", label: "微积分" },
+          { value: "probability", label: "概率" },
+          { value: "number-theory", label: "数论" },
+          { value: "solution", label: "题解" }
+        ],
+
+        computer: [
+          { value: "frontend", label: "前端" },
+          { value: "backend", label: "后端" },
+          { value: "algorithm", label: "算法" },
+          { value: "database", label: "数据库" },
+          { value: "ai", label: "人工智能" },
+          { value: "debugging", label: "调试" }
+        ],
+
+        general: [
+          { value: "question", label: "提问" },
+          { value: "discussion", label: "讨论" },
+          { value: "sharing", label: "分享" },
+          { value: "suggestion", label: "建议" }
+        ]
+      };
+
+      const discussionForm =
+        document.getElementById("discussionForm");
+
+      const titleInput =
+        document.getElementById("titleInput");
+
+      const categorySelect =
+        document.getElementById("categorySelect");
+
+      const tagsField =
+        document.getElementById("tagsField");
+
+      const tagsContainer =
+        document.getElementById("tagsContainer");
+
+      const tagsHelp =
+        document.getElementById("tagsHelp");
+
+      const contentInput =
+        document.getElementById("contentInput");
+
+      const discussionMessage =
+        document.getElementById(
+          "discussionMessage"
+        );
+
+      const submitButton =
+        document.getElementById("submitButton");
+
+      /*
+       * 用户选择区域后重新生成标签。
+       */
+      categorySelect.addEventListener(
+        "change",
+        function () {
+          const category = categorySelect.value;
+          const availableTags =
+            tagsByCategory[category] ?? [];
+
+          tagsContainer.replaceChildren();
+
+          if (availableTags.length === 0) {
+            tagsField.disabled = true;
+            tagsHelp.textContent =
+              "请先选择一个区域";
+            return;
+          }
+
+          tagsField.disabled = false;
+          tagsHelp.textContent =
+            "请选择 1～3 个标签";
+
+          for (const tag of availableTags) {
+            const label =
+              document.createElement("label");
+
+            label.className =
+              "discussion-tag-option";
+
+            const input =
+              document.createElement("input");
+
+            input.type = "checkbox";
+            input.name = "tags";
+            input.value = tag.value;
+
+            const text =
+              document.createElement("span");
+
+            text.textContent = tag.label;
+
+            label.append(input, text);
+            tagsContainer.append(label);
+          }
+        }
+      );
+
+      /*
+       * 最多只能选三个标签。
+       */
+      tagsContainer.addEventListener(
+        "change",
+        function (event) {
+          const selectedTags = getSelectedTags();
+
+          if (selectedTags.length > 3) {
+            event.target.checked = false;
+
+            discussionMessage.textContent =
+              "最多只能选择 3 个标签。";
+          } else {
+            discussionMessage.textContent = "";
+          }
+        }
+      );
+
+      function getSelectedTags() {
+        return Array.from(
+          document.querySelectorAll(
+            'input[name="tags"]:checked'
+          ),
+          function (input) {
+            return input.value;
+          }
+        );
+      }
+
+      /*
+       * 提交讨论。
+       */
+      discussionForm.addEventListener(
+        "submit",
+        async function (event) {
+          event.preventDefault();
+
+          const title = titleInput.value.trim();
+          const category = categorySelect.value;
+          const tags = getSelectedTags();
+          const content = contentInput.value.trim();
+
+          if (title.length < 4) {
+            discussionMessage.textContent =
+              "标题至少需要 4 个字符。";
+
+            titleInput.focus();
+            return;
+          }
+
+          if (!category) {
+            discussionMessage.textContent =
+              "请选择讨论区域。";
+
+            categorySelect.focus();
+            return;
+          }
+
+          if (tags.length === 0) {
+            discussionMessage.textContent =
+              "请至少选择一个标签。";
+
+            return;
+          }
+
+          if (content.length < 10) {
+            discussionMessage.textContent =
+              "讨论内容至少需要 10 个字符。";
+
+            contentInput.focus();
+            return;
+          }
+
+          submitButton.disabled = true;
+          discussionMessage.textContent =
+            "正在提交讨论……";
+
+          try {
+            const {
+              data: { user },
+              error: userError
+            } =
+              await window.siteSupabase.auth.getUser();
+
+            if (userError) {
+              throw userError;
+            }
+
+            if (!user) {
+              window.location.href = "../login.html";
+              return;
+            }
+
+            const { data: post, error: postError } =
+              await window.siteSupabase
+                .from("posts")
+                .insert({
+                  author_id: user.id,
+                  title: title,
+                  category: category,
+                  tags: tags,
+                  content: content
+                })
+                .select()
+                .single();
+
+            if (postError) {
+              throw postError;
+            }
+
+            discussionMessage.textContent =
+              "讨论提交成功，正在返回论坛……";
+
+            window.location.replace(
+              `./index.html?post=${encodeURIComponent(
+                post.id
+              )}`
+            );
+          } catch (error) {
+            console.error("提交讨论失败：", error);
+
+            discussionMessage.textContent =
+              "提交失败，请稍后再试。";
+
+            submitButton.disabled = false;
+          }
+        }
+      );
+    </script>
+  </body>
+</html>
