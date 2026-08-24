@@ -10,7 +10,6 @@
 
     <title>论坛</title>
 
-    <!-- 因为当前文件在 forum 文件夹中，所以要返回上一级 -->
     <link rel="stylesheet" href="./styles.css" />
   </head>
 
@@ -27,12 +26,11 @@
 
       <!-- 不同的论坛区域 -->
       <section class="forum-sections" aria-label="论坛区域">
-        <article class="forum-section-card" id="general">
-          <span class="forum-section-number">01</span>
+        <article class="forum-section-card" id="physics">
 
           <div>
-            <h2>综合讨论</h2>
-            <p>分享想法，以及讨论各种有趣的话题。</p>
+            <h2>物理区</h2>
+            <p>提出疑问，解答疑问，或发表题解</p>
           </div>
 
           <span class="forum-card-arrow" aria-hidden="true">
@@ -40,31 +38,6 @@
           </span>
         </article>
 
-        <article class="forum-section-card" id="help">
-          <span class="forum-section-number">02</span>
-
-          <div>
-            <h2>问题与帮助</h2>
-            <p>提出问题，或者帮助其他社区成员。</p>
-          </div>
-
-          <span class="forum-card-arrow" aria-hidden="true">
-            ›
-          </span>
-        </article>
-
-        <article class="forum-section-card" id="showcase">
-          <span class="forum-section-number">03</span>
-
-          <div>
-            <h2>作品展示</h2>
-            <p>展示你的项目、作品以及最新发现。</p>
-          </div>
-
-          <span class="forum-card-arrow" aria-hidden="true">
-            ›
-          </span>
-        </article>
       </section>
     </main>
 
@@ -118,19 +91,9 @@
             论坛区域
           </span>
 
-          <a href="#general">
-            <span>综合讨论</span>
+          <a href="#physics">
+            <span>物理区</span>
             <span aria-hidden="true">01</span>
-          </a>
-
-          <a href="#help">
-            <span>问题与帮助</span>
-            <span aria-hidden="true">02</span>
-          </a>
-
-          <a href="#showcase">
-            <span>作品展示</span>
-            <span aria-hidden="true">03</span>
           </a>
         </nav>
 
@@ -141,10 +104,8 @@
       </div>
     </aside>
 
-    <!-- Supabase 必须先加载 -->
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- forum/index.html 位于子文件夹，所以使用 ../ -->
     <script src="../site-cloud-helper.js"></script>
 
     <script>
