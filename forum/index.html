@@ -323,7 +323,7 @@
         await window.siteSupabase
           .from("posts")
           .select(`
-            id,
+            post_id,
             author_id,
             title,
             category,
@@ -369,35 +369,29 @@
 
       showEmptyCategoryMessages();
     } catch (error) {
-  console.error("加载帖子失败：", error);
+      console.error("加载帖子失败：", error);
 
-  const errorDetails =
-    error?.message
-    || error?.details
-    || String(error);
+      for (
+        const container
+        of Object.values(categoryContainers)
+      ) {
+        if (!container) {
+          continue;
+        }
 
-  for (
-    const container
-    of Object.values(categoryContainers)
-  ) {
-    if (!container) {
-      continue;
+        const errorMessage =
+          document.createElement("p");
+
+        errorMessage.className =
+          "forum-post-empty";
+
+        errorMessage.textContent =
+          "帖子加载失败，请稍后重试。";
+
+        container.append(errorMessage);
+      }
     }
-
-    container.replaceChildren();
-
-    const errorMessage =
-      document.createElement("p");
-
-    errorMessage.className =
-      "forum-post-empty";
-
-    errorMessage.textContent =
-      `帖子加载失败：${errorDetails}`;
-
-    container.append(errorMessage);
   }
-}
 
   /*
    * 根据一条数据库记录创建帖子 HTML。
@@ -474,8 +468,11 @@
      * 目前数据库没有公开用户邮箱，
      * 因此先显示用户 UUID 的前八位。
      */
+    const shortAuthorId =
+        post.author_id?.slice(0, 8) ?? "未知";
+
     author.textContent =
-      `用户 ${post.author_id.slice(0, 8)}`;
+        `用户 ${shortAuthorId}`;
 
     const openText =
         document.createElement("span");
