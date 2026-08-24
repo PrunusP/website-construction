@@ -71,6 +71,7 @@ a {
   display: grid;
   gap: 12px;
   margin-top: clamp(60px, 9vw, 110px);
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .forum-section-card {
@@ -377,4 +378,110 @@ a {
 
 #physics {
   scroll-margin-top: 24px;
+}
+
+/* ================================
+   论坛主体
+   ================================ */
+
+.forum-zone {
+  display: grid;
+  gap: 18px;
+  width: min(940px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 40px 0 80px;
+}
+
+/* 每个学科区域 */
+.forum-subject {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  scroll-margin-top: 24px;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+/* 鼠标放到学科区域上时 */
+.forum-subject:hover {
+  border-color: var(--blue);
+  transform: translateY(-2px);
+  box-shadow:
+    0 22px 50px rgba(25, 33, 42, 0.12);
+}
+
+/* 学科区域的头部 */
+.forum-subject-header {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  align-items: start;
+  gap: 18px;
+  padding: 26px 28px;
+  border-bottom: 1px solid var(--line);
+}
+
+
+/* 学科名称 */
+.forum-subject-header h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  line-height: 1.1;
+}
+
+/* “欢迎来到物理区” */
+.forum-subject-header p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* 学科区域的下半部分 */
+.forum-subject-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px 28px;
+}
+
+/* 学科介绍 */
+.forum-subject-content > p {
+  max-width: 620px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* 键盘操作时的焦点 */
+.forum-subject-link:focus-visible {
+  outline: 3px solid rgba(47, 111, 180, 0.3);
+  outline-offset: 3px;
+}
+
+@media (max-width: 620px) {
+  .forum-zone {
+    width: min(100% - 32px, 540px);
+    padding: 28px 0 60px;
+  }
+
+  .forum-subject-header {
+    grid-template-columns: 38px 1fr;
+    gap: 12px;
+    padding: 22px 18px;
+  }
+
+  .forum-subject-content {
+    display: grid;
+    gap: 18px;
+    padding: 20px 18px;
+  }
+
+  .forum-subject-link {
+    width: 100%;
+  }
 }
