@@ -417,7 +417,7 @@ a {
 /* 学科区域的头部 */
 .forum-subject-header {
   display: grid;
-  grid-template-columns: 54px 1fr;
+  grid-template-columns: 1fr;
   align-items: start;
   gap: 18px;
   padding: 26px 28px;
@@ -434,7 +434,7 @@ a {
 
 /* “欢迎来到物理区” */
 .forum-subject-header p {
-  margin: 0 0;
+  margin:8px 0 0;
   color: var(--muted);
   font-size: 1rem;
   line-height: 1.6;
