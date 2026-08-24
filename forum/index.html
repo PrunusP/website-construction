@@ -369,29 +369,35 @@
 
       showEmptyCategoryMessages();
     } catch (error) {
-      console.error("加载帖子失败：", error);
+  console.error("加载帖子失败：", error);
 
-      for (
-        const container
-        of Object.values(categoryContainers)
-      ) {
-        if (!container) {
-          continue;
-        }
+  const errorDetails =
+    error?.message
+    || error?.details
+    || String(error);
 
-        const errorMessage =
-          document.createElement("p");
-
-        errorMessage.className =
-          "forum-post-empty";
-
-        errorMessage.textContent =
-          "帖子加载失败，请稍后重试。";
-
-        container.append(errorMessage);
-      }
+  for (
+    const container
+    of Object.values(categoryContainers)
+  ) {
+    if (!container) {
+      continue;
     }
+
+    container.replaceChildren();
+
+    const errorMessage =
+      document.createElement("p");
+
+    errorMessage.className =
+      "forum-post-empty";
+
+    errorMessage.textContent =
+      `帖子加载失败：${errorDetails}`;
+
+    container.append(errorMessage);
   }
+}
 
   /*
    * 根据一条数据库记录创建帖子 HTML。
