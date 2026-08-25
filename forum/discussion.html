@@ -131,7 +131,7 @@
             await window.siteSupabase
               .from("posts")
               .select(`
-                id,
+                post_id,
                 author_id,
                 title,
                 category,
@@ -139,7 +139,7 @@
                 content,
                 created_at
               `)
-              .eq("id", postId)
+              .eq("post_id", postId)
               .single();
 
           if (error) {
