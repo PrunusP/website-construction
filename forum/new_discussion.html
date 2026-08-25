@@ -12,6 +12,10 @@
 
     <!-- 当前文件位于 forum 文件夹中 -->
     <link rel="stylesheet" href="./styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+    />
   </head>
 
   <body class="discussion-editor-page">
@@ -28,6 +32,7 @@
       <form
         class="discussion-form"
         id="discussionForm"
+        novalidate
       >
         <!-- 标题 -->
         <label class="discussion-field">
@@ -90,11 +95,7 @@
         <!-- 正文 -->
          
         <label class="discussion-field">
-          <form
-            class="discussion-form"
-            id="discussionForm"
-            novalidate
-          >
+         
           <span>讨论内容（支持 Markdown）</span>
 
           <textarea
@@ -160,6 +161,11 @@
 
 <!-- 防止 Markdown 中夹带危险 HTML -->
 <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+<!-- 数学公式 -->
+<script src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+
+<!-- KaTeX 自动渲染扩展 -->
+<script src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
 
     <script>
       /*
@@ -410,7 +416,7 @@
 
    
 <script>
-function renderMarkdown(markdownText) {
+function renderMarkdownInto(targetElement,markdownText) {
   /*
    * 第一步：Markdown 转换成 HTML。
    */
@@ -427,9 +433,34 @@ function renderMarkdown(markdownText) {
       }
     });
 
-  return safeHtml;
-}
+    targetElement.innerHTML = safeHtml;
+    
+     renderMathInElement(targetElement, {
+    delimiters: [
+      {
+        left: "$$",
+        right: "$$",
+        display: true
+      },
+      {
+        left: "$",
+        right: "$",
+        display: false
+      }
+    ],
 
+    /*
+     * 公式写错时不让整个预览崩溃。
+     */
+    throwOnError: false,
+
+    /*
+     * 不允许公式执行需要信任权限的功能。
+     */
+    trust: false
+  });
+  
+}
 contentInput.addEventListener(
   "input",
   function () {
@@ -443,7 +474,7 @@ contentInput.addEventListener(
       markdownText.length;
 
     /*
-     * 实时显示字符数量提示。
+     * 实时更新字符数量。
      */
     if (contentLength === 0) {
       contentLengthMessage.textContent =
@@ -453,8 +484,11 @@ contentInput.addEventListener(
         "input-error-message"
       );
     } else if (contentLength < 10) {
+      const remaining =
+        10 - contentLength;
+
       contentLengthMessage.textContent =
-        `还需要 ${10 - contentLength} 个字符`;
+        `还需要输入 ${remaining} 个字符`;
 
       contentLengthMessage.classList.add(
         "input-error-message"
@@ -469,7 +503,7 @@ contentInput.addEventListener(
     }
 
     /*
-     * 实时显示 Markdown 预览。
+     * 输入为空时显示默认提示。
      */
     if (!markdownText) {
       markdownPreview.replaceChildren();
@@ -481,38 +515,31 @@ contentInput.addEventListener(
         "markdown-preview-empty";
 
       emptyMessage.textContent =
-        "Markdown 预览会显示在这里";
+        "Markdown 和公式预览会显示在这里";
 
       markdownPreview.append(emptyMessage);
       return;
     }
 
+    /*
+     * 实时渲染 Markdown 和数学公式。
+     */
     try {
-      const unsafeHtml =
-        marked.parse(originalText);
-
-      const safeHtml =
-        DOMPurify.sanitize(unsafeHtml, {
-          USE_PROFILES: {
-            html: true
-          }
-        });
-
-      markdownPreview.innerHTML =
-        safeHtml;
+      renderMarkdownInto(
+        markdownPreview,
+        originalText
+      );
     } catch (error) {
       console.error(
-        "Markdown 预览失败：",
+        "Markdown 或公式预览失败：",
         error
       );
 
       markdownPreview.textContent =
-        "Markdown 预览生成失败。";
+        "预览生成失败，请检查公式语法。";
     }
   }
 );
-
-
 </script>
   </body>
 </html>
