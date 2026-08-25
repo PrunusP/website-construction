@@ -149,6 +149,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../site-cloud-helper.js"></script>
 
+     <!-- Markdown 转换器 -->
+<script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+
+<!-- 防止 Markdown 中夹带危险 HTML -->
+<script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+
     <script>
       /*
        * 每个区域允许使用的固定标签。
@@ -197,6 +203,17 @@
 
       const submitButton =
         document.getElementById("submitButton");
+
+        const markdownPreview =
+          document.getElementById("markdownPreview");
+
+
+        const contentLengthMessage =
+          document.getElementById(
+            "contentLengthMessage"
+          );
+
+        
 
       /*
        * 用户选择区域后重新生成标签。
@@ -320,6 +337,14 @@
             return;
           }
 
+          if (content.length > 10000) {
+            discussionMessage.textContent =
+              "讨论内容最多 10000 个字符。";
+
+            contentInput.focus();
+            return;
+          }
+
           submitButton.disabled = true;
           discussionMessage.textContent =
             "正在提交讨论……";
@@ -362,7 +387,7 @@
 
             window.location.replace(
               `./index.html?post=${encodeURIComponent(
-                post.id
+                post.post_id
               )}`
             );
           } catch (error) {
@@ -377,15 +402,8 @@
       );
     </script>
 
-    <!-- Markdown 转换器 -->
-<script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
-
-<!-- 防止 Markdown 中夹带危险 HTML -->
-<script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+   
 <script>
-const markdownPreview =
-  document.getElementById("markdownPreview");
-
 function renderMarkdown(markdownText) {
   /*
    * 第一步：Markdown 转换成 HTML。
@@ -409,11 +427,46 @@ function renderMarkdown(markdownText) {
 contentInput.addEventListener(
   "input",
   function () {
-    const markdownText =
-      contentInput.value.trim();
+    const originalText =
+      contentInput.value;
 
+    const markdownText =
+      originalText.trim();
+
+    const contentLength =
+      markdownText.length;
+
+    /*
+     * 实时显示字符数量提示。
+     */
+    if (contentLength === 0) {
+      contentLengthMessage.textContent =
+        "至少 10 个字符，最多 10000 个字符";
+
+      contentLengthMessage.classList.remove(
+        "input-error-message"
+      );
+    } else if (contentLength < 10) {
+      contentLengthMessage.textContent =
+        `还需要 ${10 - contentLength} 个字符`;
+
+      contentLengthMessage.classList.add(
+        "input-error-message"
+      );
+    } else {
+      contentLengthMessage.textContent =
+        `已经输入 ${contentLength} / 10000 个字符`;
+
+      contentLengthMessage.classList.remove(
+        "input-error-message"
+      );
+    }
+
+    /*
+     * 实时显示 Markdown 预览。
+     */
     if (!markdownText) {
-      markdownPreview.innerHTML = "";
+      markdownPreview.replaceChildren();
 
       const emptyMessage =
         document.createElement("p");
@@ -428,27 +481,32 @@ contentInput.addEventListener(
       return;
     }
 
-    markdownPreview.innerHTML =
-      renderMarkdown(markdownText);
+    try {
+      const unsafeHtml =
+        marked.parse(originalText);
+
+      const safeHtml =
+        DOMPurify.sanitize(unsafeHtml, {
+          USE_PROFILES: {
+            html: true
+          }
+        });
+
+      markdownPreview.innerHTML =
+        safeHtml;
+    } catch (error) {
+      console.error(
+        "Markdown 预览失败：",
+        error
+      );
+
+      markdownPreview.textContent =
+        "Markdown 预览生成失败。";
+    }
   }
 );
 
-const { data: post, error: postError } =
-  await window.siteSupabase
-    .from("posts")
-    .insert({
-      author_id: user.id,
-      title: title,
-      category: category,
-      tags: tags,
 
-      /*
-       * 保存原始 Markdown，不保存生成后的 HTML。
-       */
-      content: content
-    })
-    .select()
-    .single();
 </script>
   </body>
 </html>
