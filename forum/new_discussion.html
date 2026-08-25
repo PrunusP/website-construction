@@ -89,22 +89,36 @@
 
         <!-- 正文 -->
         <label class="discussion-field">
-          <span>讨论内容</span>
+          <span>讨论内容（支持 Markdown）</span>
 
           <textarea
             id="contentInput"
             name="content"
             minlength="10"
-            maxlength="5000"
+            maxlength="10000"
             rows="14"
-            placeholder="详细描述你的问题、想法或解题过程……"
+            placeholder="Write a Post"
+            
             required
           ></textarea>
 
           <small>
-            最多 5000 个字符
+            论坛支持markdown哦
           </small>
         </label>
+
+        <section class="markdown-preview-panel">
+          <h2>预览</h2>
+
+          <div
+            class="markdown-body"
+            id="markdownPreview"
+          >
+            <p class="markdown-preview-empty">
+              Markdown 预览会显示在这里
+            </p>
+          </div>
+        </section>
 
         <p
           class="discussion-message"
