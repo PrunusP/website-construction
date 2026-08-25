@@ -88,7 +88,13 @@
         </fieldset>
 
         <!-- 正文 -->
+         
         <label class="discussion-field">
+          <form
+            class="discussion-form"
+            id="discussionForm"
+            novalidate
+          >
           <span>讨论内容（支持 Markdown）</span>
 
           <textarea
@@ -102,8 +108,8 @@
             required
           ></textarea>
 
-          <small>
-            最多10000个字符
+          <small id="contentLengthMessage">
+            至少 10 个字符，最多 10000 个字符
           </small>
         </label>
 
