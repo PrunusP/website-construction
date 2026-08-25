@@ -98,12 +98,12 @@
             maxlength="10000"
             rows="14"
             placeholder="Write a Post"
-            
+
             required
           ></textarea>
 
           <small>
-            论坛支持markdown哦
+            最多10000个字符
           </small>
         </label>
 
@@ -376,5 +376,80 @@
         }
       );
     </script>
+
+    <!-- Markdown 转换器 -->
+<script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+
+<!-- 防止 Markdown 中夹带危险 HTML -->
+<script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+<script>
+const markdownPreview =
+  document.getElementById("markdownPreview");
+
+function renderMarkdown(markdownText) {
+  /*
+   * 第一步：Markdown 转换成 HTML。
+   */
+  const unsafeHtml =
+    marked.parse(markdownText);
+
+  /*
+   * 第二步：清理危险 HTML。
+   */
+  const safeHtml =
+    DOMPurify.sanitize(unsafeHtml, {
+      USE_PROFILES: {
+        html: true
+      }
+    });
+
+  return safeHtml;
+}
+
+contentInput.addEventListener(
+  "input",
+  function () {
+    const markdownText =
+      contentInput.value.trim();
+
+    if (!markdownText) {
+      markdownPreview.innerHTML = "";
+
+      const emptyMessage =
+        document.createElement("p");
+
+      emptyMessage.className =
+        "markdown-preview-empty";
+
+      emptyMessage.textContent =
+        "Markdown 预览会显示在这里";
+
+      markdownPreview.append(emptyMessage);
+      return;
+    }
+
+    markdownPreview.innerHTML =
+      renderMarkdown(markdownText);
+  }
+);
+
+const { data: post, error: postError } =
+  await window.siteSupabase
+    .from("posts")
+    .insert({
+      author_id: user.id,
+      title: title,
+      category: category,
+      tags: tags,
+
+      /*
+       * 保存原始 Markdown，不保存生成后的 HTML。
+       */
+      content: content
+    })
+    .select()
+    .single();
+</script>
   </body>
 </html>
+
