@@ -252,10 +252,7 @@
           }
         }
       );
-    </script>
 
-   
-<script>
 function renderMarkdownInto(targetElement,markdownText) {
   /*
    * 第一步：Markdown 转换成 HTML。
