@@ -2,12 +2,20 @@
 
       const tagNames = {
         unsolved: "未解决",
+        other: "其他",
         solved: "已解决",
+
         Physics1: "AP Physics 1",
         Physics2: "AP Physics 2",
         PhysicsC: "AP Physics C",
         solution: "题解",
-        other: "其他"
+
+        english: "English",
+        chinese: "中文",
+        otherLanguage: "其他语言",
+        jotting: "随笔",
+        criticize: "文学批评",
+        novel:  "小说",
       };
 
       const discussionStatus =
@@ -45,6 +53,33 @@
           "discussionContent"
         );
 
+        const ownerActions =
+        document.getElementById("ownerActions");
+
+const editPostButton =
+  document.getElementById("editPostButton");
+
+const deletePostButton =
+  document.getElementById("deletePostButton");
+
+let currentPost = null;
+
+async function checkPostOwnership(post) {
+  const {
+    data: { user },
+    error
+  } = await window.siteSupabase.auth.getUser();
+
+  if (error) {
+    console.error("获取用户失败：", error);
+    return;
+  }
+
+  const isAuthor =
+    user && user.id === post.author_id;
+
+  ownerActions.hidden = !isAuthor;
+}
       async function loadDiscussion() {
         /*
          * 从地址中取得帖子 ID。
@@ -86,6 +121,8 @@
           if (error) {
             throw error;
           }
+          currentPost = post;
+          await checkPostOwnership(post);
 
           renderDiscussion(post);
         } catch (error) {
@@ -99,6 +136,39 @@
         }
       }
 
+      deletePostButton.addEventListener(
+  "click",
+  async function () {
+    if (!currentPost) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "确定要永久删除这个帖子吗？"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    deletePostButton.disabled = true;
+
+    const { error } =
+      await window.siteSupabase
+        .from("posts")
+        .delete()
+        .eq("post_id", currentPost.post_id);
+
+    if (error) {
+      console.error("删除帖子失败：", error);
+      alert(`删除失败：${error.message}`);
+      deletePostButton.disabled = false;
+      return;
+    }
+
+    window.location.href = "./index.html";
+  }
+);
       function renderDiscussion(post) {
         discussionTitle.textContent =
           post.title || "无标题讨论";
@@ -165,3 +235,17 @@
       }
 
       loadDiscussion();
+
+      editPostButton.addEventListener(
+        "click",
+        function () {
+          if (!currentPost) {
+            return;
+          }
+
+          window.location.href =
+            `./edit_discussion.html?id=${encodeURIComponent(
+              currentPost.post_id
+            )}`;
+        }
+      );
