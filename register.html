@@ -17,7 +17,7 @@
       <section class="login-panel">
         <h1>注册账号</h1>
 
-        <form class="login-form" id="registerForm">
+        <form class="login-form" id="registerForm" novalidate>
           <label for="usernameInput">
             用户名
 
@@ -155,7 +155,7 @@
       ) {
         if (username.length === 1) {
           registerMessage.textContent =
-            "用户名至少需要 2 个字符。（是的，我们暂时不允许单字 ID 😂）";
+            "用户名至少需要 2 个字符。（是的，我们暂时不允许极品单字id lol）";
         } else {
           registerMessage.textContent =
             "用户名长度必须为 2～24 个字符。";
