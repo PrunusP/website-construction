@@ -18,6 +18,7 @@
         novel:  "小说",
       };
 
+      
       const discussionStatus =
         document.getElementById(
           "discussionStatus"
@@ -63,6 +64,15 @@ const deletePostButton =
   document.getElementById("deletePostButton");
 
 let currentPost = null;
+
+const createdTime =
+  new Date(post.created_at).getTime();
+
+const updatedTime =
+  new Date(post.updated_at).getTime();
+
+const wasEdited =
+  updatedTime > createdTime + 1000;
 
 async function checkPostOwnership(post) {
   const {
@@ -113,13 +123,18 @@ async function checkPostOwnership(post) {
                 category,
                 tags,
                 content,
-                created_at
+                created_at,
+                updated_at
               `)
               .eq("post_id", postId)
               .single();
 
+          
           if (error) {
             throw error;
+          }
+          if (!post) {
+            throw new Error("没有找到帖子");
           }
           currentPost = post;
           await checkPostOwnership(post);
@@ -132,7 +147,7 @@ async function checkPostOwnership(post) {
           );
 
           discussionStatus.textContent =
-            "无法找到这篇讨论，或者帖子加载失败。";
+            "帖子加载失败。";
         }
       }
 
@@ -179,24 +194,64 @@ async function checkPostOwnership(post) {
 
         discussionAuthor.textContent =
           `用户 ${shortAuthorId}`;
+const createdDate =
+  new Date(post.created_at);
 
-        const createdDate =
-          new Date(post.created_at);
+discussionTime.dateTime =
+  post.created_at;
 
-        discussionTime.dateTime =
-          post.created_at;
+const createdTimeText =
+  createdDate.toLocaleString(
+    "zh-CN",
+    {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }
+  );
 
-        discussionTime.textContent =
-          createdDate.toLocaleString(
-            "zh-CN",
-            {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit"
-            }
-          );
+discussionTime.textContent =
+  `发布于 ${createdTimeText}`;
+
+
+/*
+ * 判断帖子是否被编辑过。
+ */
+if (post.updated_at) {
+  const createdTimestamp =
+    new Date(post.created_at).getTime();
+
+  const updatedTimestamp =
+    new Date(post.updated_at).getTime();
+
+  /*
+   * 相差超过一秒才显示为编辑过，
+   * 避免创建时的微小时间差。
+   */
+  const wasEdited =
+    updatedTimestamp
+    > createdTimestamp + 1000;
+
+  if (wasEdited) {
+    const editedTimeText =
+      new Date(post.updated_at)
+        .toLocaleString(
+          "zh-CN",
+          {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          }
+        );
+
+    discussionTime.textContent +=
+      ` · 编辑于 ${editedTimeText}`;
+  }
+}
 
         discussionTags.replaceChildren();
 
