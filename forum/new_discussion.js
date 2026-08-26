@@ -64,6 +64,21 @@
           document.getElementById(
             "contentLengthMessage"
           );
+          //editDiscussion
+
+const parameters =
+  new URLSearchParams(window.location.search);
+
+const postId = parameters.get("id");
+
+const categoryInput =
+  document.getElementById("categoryInput");
+
+const editMessage =
+  document.getElementById("editMessage");
+
+const editDiscussionForm =
+  document.getElementById("editDiscussionForm");
 
         
 
@@ -378,27 +393,9 @@ contentInput.addEventListener(
   }
 );
 
-<!--editDiscussion-->
 
-const parameters =
-  new URLSearchParams(window.location.search);
+//editDiscussion
 
-const postId = parameters.get("id");
-
-const titleInput =
-  document.getElementById("titleInput");
-
-const categoryInput =
-  document.getElementById("categoryInput");
-
-const contentInput =
-  document.getElementById("contentInput");
-
-const editMessage =
-  document.getElementById("editMessage");
-
-const editDiscussionForm =
-  document.getElementById("editDiscussionForm");
 
 let originalPost = null;
 
