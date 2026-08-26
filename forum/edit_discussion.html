@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+
+    <title>发起讨论</title>
+
+    <!-- 当前文件位于 forum 文件夹中 -->
+    <link rel="stylesheet" href="./styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
+    />
+  </head>
+
+  <body class="discussion-editor-page">
+    <main class="discussion-editor-shell">
+      <header class="discussion-editor-header">
+        <p class="eyebrow">NEW DISCUSSION</p>
+        <h1>发起讨论</h1>
+
+        <p>
+          选择正确的区域和标签，可以让其他用户更容易找到你的讨论。
+        </p>
+      </header>
+
+      <form id="editDiscussionForm">
+  <label for="titleInput">
+    标题
+    <input
+      id="titleInput"
+      type="text"
+      required
+      maxlength="100"
+    />
+  </label>
+
+  <label for="categoryInput">
+    区域
+    <select id="categoryInput" required>
+      <option value="physics">物理区</option>
+      <option value="literature">文学区</option>
+    </select>
+  </label>
+
+  <div id="tagsContainer"></div>
+
+  <label for="contentInput">
+    帖子内容
+    <textarea
+      id="contentInput"
+      required
+      minlength="10"
+    ></textarea>
+  </label>
+
+  <p id="editMessage" role="status"></p>
+
+  <button id="savePostButton" type="submit">
+    保存修改
+  </button>
+</form>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../site-cloud-helper.js"></script>
+
+     <!-- Markdown 转换器 -->
+<script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+
+<!-- 防止 Markdown 中夹带危险 HTML -->
+<script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+<!-- 数学公式 -->
+<script src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+
+<!-- KaTeX 自动渲染扩展 -->
+<script src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+    <script src="./new_discussion.js"></script>
+  </body>
+</html>
+
