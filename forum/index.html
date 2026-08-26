@@ -223,59 +223,75 @@
           }
         }
       );
+async function loadCurrentUser() {
+  try {
+    const {
+      data: { user },
+      error: userError
+    } =
+      await window.siteSupabase.auth.getUser();
 
-      async function loadCurrentUser() {
-        try {
-          const {
-            data: { user },
-            error
-          } =
-            await window.siteSupabase.auth.getUser();
+    if (userError) {
+      throw userError;
+    }
 
-          if (error) {
-            throw error;
-          }
+    if (!user) {
+      userGreeting.textContent =
+        "Hi, 访客";
 
-          if (!user) {
-            userGreeting.textContent =
-              "Hi, 访客";
+      startDiscussionButton.href =
+        "../login.html";
 
-            /*
-             * 未登录时，点击发起讨论按钮会前往登录页。
-             */
-            startDiscussionButton.href =
-              "../login.html";
+      startDiscussionButton
+        .querySelector("span")
+        .textContent =
+          "登录后发起讨论";
 
-            startDiscussionButton
-              .querySelector("span")
-              .textContent = "登录后发起讨论";
+      return;
+    }
 
-            return;
-          }
+    /*
+     * 先使用 Auth metadata 中的用户名作为备用值。
+     */
+    let username =
+      user.user_metadata?.username
+      ?? "用户";
 
-          /*
-           * 使用 textContent 写入邮箱，
-           * 不使用 innerHTML，避免把邮箱当作 HTML 解析。
-           */
-          userGreeting.textContent =
-            `Hi, ${user.email ?? "用户"}`;
-        } catch (error) {
-          console.error(
-            "读取论坛用户失败：",
-            error
-          );
+    const {
+      data: profile,
+      error: profileError
+    } =
+      await window.siteSupabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
 
-          userGreeting.textContent =
-            "Hi, 访客";
+    if (profileError) {
+      /*
+       * profiles 读取失败时不让整个功能失败，
+       * 继续显示 metadata 中的用户名。
+       */
+      console.warn(
+        "读取 profile 失败，将使用 metadata：",
+        profileError
+      );
+    } else if (profile?.username) {
+      username = profile.username;
+    }
 
-          startDiscussionButton.href =
-            "../login.html";
+    userGreeting.textContent =
+      `Hi, ${username}`;
+  } catch (error) {
+    console.error(
+      "读取用户资料失败：",
+      error
+    );
 
-          startDiscussionButton
-            .querySelector("span")
-            .textContent = "登录后发起讨论";
-        }
-      }
+    userGreeting.textContent =
+      "Hi, 访客";
+  }
+}
 
       loadCurrentUser();
     </script>
@@ -339,7 +355,51 @@
       if (error) {
         throw error;
       }
+      const authorIds = [
+        ...new Set(
+          posts
+            .map(function (post) {
+              return post.author_id;
+            })
+            .filter(Boolean)
+        )
+      ];
 
+      let usernameByUserId = {};
+      if (authorIds.length > 0) {
+  const {
+    data: profiles,
+    error: profilesError
+  } =
+    await window.siteSupabase
+      .from("profiles")
+      .select("id, username")
+      .in("id", authorIds);
+
+  if (profilesError) {
+    console.warn(
+      "读取帖子作者用户名失败：",
+      profilesError
+    );
+  } else {
+    usernameByUserId =
+      Object.fromEntries(
+        profiles.map(function (profile) {
+          usernameByUserId =
+          Object.fromEntries(
+            (profiles ?? []).map(
+              function (profile) {
+                return [
+                  profile.id,
+                  profile.username
+                ];
+              }
+            )
+          );
+        })
+      );
+  }
+      }
       /*
        * 把每个帖子放到它所属的区域中。
        */
@@ -362,7 +422,7 @@
         }
 
         const postElement =
-          createPostElement(post);
+          createPostElement(post,usernameByUserId);
 
         targetContainer.append(postElement);
       }
@@ -396,7 +456,7 @@
   /*
    * 根据一条数据库记录创建帖子 HTML。
    */
-  function createPostElement(post) {
+  function createPostElement(post,usernameByUserId) {
     const card =
       document.createElement("a");
 
@@ -406,6 +466,7 @@
     `./discussion.html?id=${encodeURIComponent(
       post.post_id
     )}`;
+
 
     const heading =
       document.createElement("div");
@@ -468,17 +529,21 @@
      * 目前数据库没有公开用户邮箱，
      * 因此先显示用户 UUID 的前八位。
      */
-    const shortAuthorId =
-        post.author_id?.slice(0, 8) ?? "未知";
+    const username =
+      usernameByUserId[post.author_id]
+      ?? `用户 ${
+        post.author_id?.slice(0, 8) ?? "未知"
+      }`;
 
-    author.textContent =
-        `用户 ${shortAuthorId}`;
+    author.textContent = username;
 
     const openText =
         document.createElement("span");
 
     openText.className = "forum-post-open";
     openText.textContent = "查看讨论 ›";
+
+    
 
     footer.append(author, openText);
 
