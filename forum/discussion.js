@@ -65,14 +65,6 @@ const deletePostButton =
 
 let currentPost = null;
 
-const createdTime =
-  new Date(post.created_at).getTime();
-
-const updatedTime =
-  new Date(post.updated_at).getTime();
-
-const wasEdited =
-  updatedTime > createdTime + 1000;
 
 async function checkPostOwnership(post) {
   const {
@@ -168,11 +160,30 @@ async function checkPostOwnership(post) {
 
     deletePostButton.disabled = true;
 
-    const { error } =
-      await window.siteSupabase
-        .from("posts")
-        .delete()
-        .eq("post_id", currentPost.post_id);
+    const {
+  data: { user },
+  error: userError
+} =
+  await window.siteSupabase.auth.getUser();
+
+if (userError || !user) {
+  alert("请先登录。");
+  deletePostButton.disabled = false;
+  return;
+}
+
+const { error } =
+  await window.siteSupabase
+    .from("posts")
+    .delete()
+    .eq(
+      "post_id",
+      currentPost.post_id
+    )
+    .eq(
+      "author_id",
+      user.id
+    );
 
     if (error) {
       console.error("删除帖子失败：", error);
