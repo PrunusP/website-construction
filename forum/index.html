@@ -366,39 +366,34 @@ async function loadCurrentUser() {
       ];
 
       let usernameByUserId = {};
-      if (authorIds.length > 0) {
-  const {
-    data: profiles,
-    error: profilesError
-  } =
-    await window.siteSupabase
-      .from("profiles")
-      .select("id, username")
-      .in("id", authorIds);
+          if (authorIds.length > 0) {
+      const {
+        data: profiles,
+        error: profilesError
+      } =
+        await window.siteSupabase
+          .from("profiles")
+          .select("id, username")
+          .in("id", authorIds);
 
-  if (profilesError) {
-    console.warn(
-      "读取帖子作者用户名失败：",
-      profilesError
-    );
-  } else {
-    usernameByUserId =
-      Object.fromEntries(
-        profiles.map(function (profile) {
-          usernameByUserId =
-          Object.fromEntries(
-            (profiles ?? []).map(
-              function (profile) {
-                return [
-                  profile.id,
-                  profile.username
-                ];
-              }
-            )
-          );
-        })
+    if (profilesError) {
+      console.warn(
+        "读取帖子作者用户名失败：",
+        profilesError
       );
-  }
+    } else {
+      usernameByUserId =
+        Object.fromEntries(
+          (profiles ?? []).map(
+            function (profile) {
+              return [
+                profile.id,
+                profile.username
+              ];
+            }
+          )
+        );
+    }
       }
       /*
        * 把每个帖子放到它所属的区域中。
