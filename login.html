@@ -69,67 +69,169 @@
     <script src="./site-cloud-helper.js"></script>
 
     <script>
-      const loginForm = document.getElementById("loginForm");
-      const emailInput = document.getElementById("emailInput");
-      const passwordInput = document.getElementById("passwordInput");
-      const loginButton = document.getElementById("loginButton");
-      const loginMessage = document.getElementById("loginMessage");
+  const loginForm =
+    document.getElementById("loginForm");
 
-      loginForm.addEventListener("submit", async function (event) {
-        // 阻止表单刷新当前页面
-        event.preventDefault();
+  const emailInput =
+    document.getElementById("emailInput");
 
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
+  const passwordInput =
+    document.getElementById("passwordInput");
 
-        loginMessage.textContent = "正在登录……";
-        loginButton.disabled = true;
+  const loginButton =
+    document.getElementById("loginButton");
 
-        try {
-          const { data, error } =
-            await window.siteSupabase.auth.signInWithPassword({
+  const loginMessage =
+    document.getElementById("loginMessage");
+
+
+  /*
+   * 取得登录成功后的安全跳转地址。
+   */
+  function getLoginDestination() {
+    const parameters =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const returnTo =
+      parameters.get("returnTo");
+
+    /*
+     * 没有 returnTo 时返回首页。
+     */
+    if (!returnTo) {
+      return "./index.html";
+    }
+
+    try {
+      const returnUrl =
+        new URL(
+          returnTo,
+          window.location.href
+        );
+
+      /*
+       * 只允许跳回当前网站。
+       */
+      if (
+        returnUrl.origin
+        === window.location.origin
+      ) {
+        return returnUrl.href;
+      }
+    } catch (error) {
+      console.warn(
+        "returnTo 地址无效：",
+        error
+      );
+    }
+
+    return "./index.html";
+  }
+
+
+  loginForm.addEventListener(
+    "submit",
+    async function (event) {
+      /*
+       * 阻止表单刷新页面。
+       */
+      event.preventDefault();
+
+      const email =
+        emailInput.value.trim();
+
+      const password =
+        passwordInput.value;
+
+      loginMessage.textContent =
+        "正在登录……";
+
+      loginButton.disabled = true;
+
+      try {
+        const {
+          data,
+          error
+        } =
+          await window.siteSupabase.auth
+            .signInWithPassword({
               email: email,
               password: password
             });
 
-          if (error) {
-            throw error;
-          }
-
-          if (!data.session) {
-            throw new Error("没有获得登录会话");
-          }
-
-          loginMessage.textContent = "登录成功，正在跳转……";
-
-          // replace 可以防止用户点击“后退”回到登录页面
-          window.location.replace("./index.html");
-        } catch (error) {
-          console.error("登录失败：", error);
-
-          loginMessage.textContent =
-            "登录失败，请检查邮箱和密码。";
-
-          loginButton.disabled = false;
-        }
-      });
-
-      // 如果打开登录页时已经登录，直接返回首页
-      async function redirectLoggedInUser() {
-        const { data, error } =
-          await window.siteSupabase.auth.getSession();
-
         if (error) {
-          console.error("读取登录状态失败：", error);
-          return;
+          throw error;
         }
 
-        if (data.session) {
-          window.location.replace("./index.html");
+        if (!data.session) {
+          throw new Error(
+            "没有获得登录会话"
+          );
         }
+
+        loginMessage.textContent =
+          "登录成功，正在跳转……";
+
+        /*
+         * 有 returnTo 就返回原页面，
+         * 否则返回网站首页。
+         */
+        const destination =
+          getLoginDestination();
+
+        /*
+         * replace 防止点击后退时
+         * 再次回到登录页面。
+         */
+        window.location.replace(
+          destination
+        );
+      } catch (error) {
+        console.error(
+          "登录失败：",
+          error
+        );
+
+        loginMessage.textContent =
+          "登录失败，请检查邮箱和密码。";
+
+        loginButton.disabled = false;
       }
+    }
+  );
 
-      redirectLoggedInUser();
-    </script>
+
+  /*
+   * 如果进入登录页时已经登录，
+   * 直接返回原页面或首页。
+   */
+  async function redirectLoggedInUser() {
+    const {
+      data,
+      error
+    } =
+      await window.siteSupabase.auth
+        .getSession();
+
+    if (error) {
+      console.error(
+        "读取登录状态失败：",
+        error
+      );
+
+      return;
+    }
+
+    if (data.session) {
+      window.location.replace(
+        getLoginDestination()
+      );
+    }
+  }
+
+  redirectLoggedInUser();
+</script>
   </body>
 </html>
