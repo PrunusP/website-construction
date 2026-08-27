@@ -98,6 +98,31 @@ const replySubmitButton =
   );
 
 
+  const openReplyButton =
+  document.getElementById(
+    "openReplyButton"
+  );
+
+const closeReplyButton =
+  document.getElementById(
+    "closeReplyButton"
+  );
+
+const cancelReplyButton =
+  document.getElementById(
+    "cancelReplyButton"
+  );
+
+const replyComposer =
+  document.getElementById(
+    "replyComposer"
+  );
+
+const replyComposerBackdrop =
+  document.getElementById(
+    "replyComposerBackdrop"
+  );
+
 async function checkPostOwnership(post) {
   const {
     data: { user },
@@ -804,17 +829,16 @@ async function submitReply(event) {
       throw insertError;
     }
 
-    replyContentInput.value = "";
+   replyContentInput.value = "";
 
-    replyMessage.textContent =
-      "回复发表成功。";
+replyMessage.textContent =
+  "回复发表成功。";
 
-    /*
-     * 重新加载回复列表。
-     */
-    await loadReplies(
-      currentPost.post_id
-    );
+await loadReplies(
+  currentPost.post_id
+);
+
+closeReplyComposer();
 
     replyMessage.textContent = "";
   } catch (error) {
@@ -831,3 +855,117 @@ async function submitReply(event) {
     replySubmitButton.disabled = false;
   }
 }
+
+
+function openReplyComposer() {
+  if (!replyComposer) {
+    return;
+  }
+
+  replyComposer.classList.add(
+    "is-open"
+  );
+
+  replyComposerBackdrop?.classList.add(
+    "is-visible"
+  );
+
+  replyComposer.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  replyComposerBackdrop?.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  openReplyButton?.setAttribute(
+    "aria-expanded",
+    "true"
+  );
+
+  document.body.classList.add(
+    "reply-composer-open"
+  );
+
+  /*
+   * 等待抽屉开始显示后，
+   * 将输入焦点放到回复框。
+   */
+  window.setTimeout(
+    function () {
+      replyContentInput?.focus();
+    },
+    220
+  );
+}
+
+function closeReplyComposer() {
+  if (!replyComposer) {
+    return;
+  }
+
+  replyComposer.classList.remove(
+    "is-open"
+  );
+
+  replyComposerBackdrop?.classList.remove(
+    "is-visible"
+  );
+
+  replyComposer.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  replyComposerBackdrop?.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  openReplyButton?.setAttribute(
+    "aria-expanded",
+    "false"
+  );
+
+  document.body.classList.remove(
+    "reply-composer-open"
+  );
+
+  openReplyButton?.focus();
+}
+
+openReplyButton?.addEventListener(
+  "click",
+  openReplyComposer
+);
+
+closeReplyButton?.addEventListener(
+  "click",
+  closeReplyComposer
+);
+
+cancelReplyButton?.addEventListener(
+  "click",
+  closeReplyComposer
+);
+
+replyComposerBackdrop?.addEventListener(
+  "click",
+  closeReplyComposer
+);
+
+document.addEventListener(
+  "keydown",
+  function (event) {
+    if (
+      event.key === "Escape"
+      && replyComposer?.classList.contains(
+        "is-open"
+      )
+    ) {
+      closeReplyComposer();
+    }
+  }
+);
