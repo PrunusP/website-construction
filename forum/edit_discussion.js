@@ -24,7 +24,7 @@
         {value: "criticize",label: "文学批评"},
         {value: "novel",label: "小说"},
         {value: "other",label: "其他"}
-        ]
+        ],
 
         chat: [
           {value: "other",label: "其他"},
@@ -652,7 +652,43 @@ editDiscussionForm.addEventListener(
     }
   }
 );
+/*
+ * 编辑按钮。
+ */
+if (editPostButton) {
+  editPostButton.addEventListener(
+    "click",
+    function () {
+      if (!currentPost) {
+        return;
+      }
 
+      window.location.href =
+        `./edit_discussion.html?id=${encodeURIComponent(
+          currentPost.post_id
+        )}`;
+    }
+  );
+} else {
+  console.error(
+    "没有找到 #editPostButton"
+  );
+}
+
+
+/*
+ * 删除按钮。
+ */
+if (deletePostButton) {
+  deletePostButton.addEventListener(
+    "click",
+    deleteCurrentPost
+  );
+} else {
+  console.error(
+    "没有找到 #deletePostButton"
+  );
+}
 
 /*
  * 页面加载完成后读取原帖。
