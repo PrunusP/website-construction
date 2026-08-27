@@ -8,10 +8,13 @@
       content="width=device-width, initial-scale=1"
     />
 
-    <title>发起讨论</title>
+    <title>编辑讨论</title>
 
-    <!-- 当前文件位于 forum 文件夹中 -->
-    <link rel="stylesheet" href="./styles.css" />
+    <link
+      rel="stylesheet"
+      href="./styles.css"
+    />
+
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css"
@@ -21,67 +24,175 @@
   <body class="discussion-editor-page">
     <main class="discussion-editor-shell">
       <header class="discussion-editor-header">
-        <p class="eyebrow">NEW DISCUSSION</p>
-        <h1>发起讨论</h1>
+        <p class="eyebrow">
+          EDIT DISCUSSION
+        </p>
+
+        <h1>编辑讨论</h1>
 
         <p>
-          选择正确的区域和标签，可以让其他用户更容易找到你的讨论。
+          修改标题、区域、标签或讨论内容，然后保存你的修改。
         </p>
       </header>
 
-      <form id="editDiscussionForm">
-  <label for="titleInput">
-    标题
-    <input
-      id="titleInput"
-      type="text"
-      required
-      maxlength="100"
-    />
-  </label>
+      <form
+        class="discussion-form"
+        id="editDiscussionForm"
+        novalidate
+      >
+        <!-- 标题 -->
+        <label class="discussion-field">
+          <span>Title</span>
 
-  <label for="categoryInput">
-    区域
-    <select id="categoryInput" required>
-      <option value="physics">物理区</option>
-      <option value="literature">文学区</option>
-    </select>
-  </label>
+          <input
+            id="titleInput"
+            name="title"
+            type="text"
+            minlength="4"
+            maxlength="100"
+            placeholder="用一句话描述你想讨论的内容"
+            required
+          />
 
-  <div id="tagsContainer"></div>
+          <small>
+            标题长度为 4～100 个字符
+          </small>
+        </label>
 
-  <label for="contentInput">
-    帖子内容
-    <textarea
-      id="contentInput"
-      required
-      minlength="10"
-    ></textarea>
-  </label>
 
-  <p id="editMessage" role="status"></p>
+        <!-- 区域 -->
+        <label class="discussion-field">
+          <span>区域</span>
 
-  <button id="savePostButton" type="submit">
-    保存修改
-  </button>
-</form>
+          <select
+            id="categoryInput"
+            name="category"
+            required
+          >
+            <option value="">
+              请选择一个区域
+            </option>
+
+            <option value="physics">
+              物理区
+            </option>
+
+            <option value="literature">
+              文学区
+            </option>
+          </select>
+        </label>
+
+
+        <!-- 标签 -->
+        <fieldset
+          class="discussion-tags-field"
+          id="tagsField"
+        >
+          <legend>Tags</legend>
+
+          <p id="tagsHelp">
+            正在加载原帖标签……
+          </p>
+
+          <!-- JavaScript 会在这里生成标签 -->
+          <div
+            class="discussion-tags"
+            id="tagsContainer"
+          ></div>
+        </fieldset>
+
+
+        <!-- 正文 -->
+        <label class="discussion-field">
+          <span>
+            讨论内容（支持 Markdown）
+          </span>
+
+          <textarea
+            id="contentInput"
+            name="content"
+            minlength="10"
+            maxlength="10000"
+            rows="14"
+            placeholder="修改帖子内容"
+            required
+          ></textarea>
+
+          <small id="contentLengthMessage">
+            至少 10 个字符，最多 10000 个字符
+          </small>
+        </label>
+
+
+        <!-- Markdown 预览 -->
+        <section class="markdown-preview-panel">
+          <h2>预览</h2>
+
+          <div
+            class="markdown-body"
+            id="markdownPreview"
+          >
+            <p class="markdown-preview-empty">
+              正在加载原帖预览……
+            </p>
+          </div>
+        </section>
+
+
+        <!-- 状态消息 -->
+        <p
+          class="discussion-message"
+          id="editMessage"
+          role="status"
+          aria-live="polite"
+        ></p>
+
+
+        <!-- 底部按钮 -->
+        <div class="discussion-actions">
+          <a
+            class="discussion-cancel-button"
+            href="./index.html"
+          >
+            取消并返回
+          </a>
+
+          <button
+            class="discussion-submit-button"
+            id="savePostButton"
+            type="submit"
+          >
+            保存修改
+          </button>
+        </div>
+      </form>
     </main>
 
+
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script src="../site-cloud-helper.js"></script>
 
-     <!-- Markdown 转换器 -->
-<script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
 
-<!-- 防止 Markdown 中夹带危险 HTML -->
-<script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
-<!-- 数学公式 -->
-<script src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+    <!-- Markdown 转换器 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
 
-<!-- KaTeX 自动渲染扩展 -->
-<script src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
 
-    <script src="./new_discussion.js"></script>
+    <!-- 防止 Markdown 中包含危险 HTML -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+
+
+    <!-- 数学公式 -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
+
+
+    <!-- KaTeX 自动渲染扩展 -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js"></script>
+
+
+    <!-- 编辑帖子代码 -->
+    <script src="./edit_discussion.js"></script>
   </body>
 </html>
-
