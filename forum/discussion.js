@@ -290,17 +290,34 @@ async function loadAuthorUsername(authorId) {
   );
 }
 
-      async function renderDiscussion(post) {
+      function renderDiscussion(post) {
   discussionTitle.textContent =
     post.title || "无标题讨论";
 
-  const authorName =
-    await loadAuthorUsername(
-      post.author_id
-    );
+  /*
+   * 先显示用户 ID，避免阻塞帖子显示。
+   */
+  const shortAuthorId =
+    post.author_id?.slice(0, 8)
+    ?? "未知";
 
   discussionAuthor.textContent =
-    authorName;
+    `用户 ${shortAuthorId}`;
+
+  /*
+   * 再异步查询真实用户名。
+   */
+  loadAuthorUsername(post.author_id)
+    .then(function (username) {
+      discussionAuthor.textContent =
+        username;
+    })
+    .catch(function (error) {
+      console.warn(
+        "显示作者用户名失败：",
+        error
+      );
+    });
 
 const createdDate =
   new Date(post.created_at);
