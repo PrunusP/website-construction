@@ -16,6 +16,8 @@
         jotting: "随笔",
         criticize: "文学批评",
         novel:  "小说",
+
+        
       };
 
       
