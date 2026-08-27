@@ -1190,3 +1190,184 @@ a {
     width: 100%;
   }
 }
+
+/* ================================
+   帖子回复区域
+   ================================ */
+
+.discussion-replies {
+  margin-top: 22px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.discussion-replies-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--line);
+  padding: 22px 28px;
+}
+
+.discussion-replies-header .eyebrow {
+  margin: 0 0 7px;
+  color: var(--blue);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.discussion-replies-header h2 {
+  margin: 0;
+  font-size: 1.45rem;
+}
+
+#replyCount {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.reply-list {
+  display: grid;
+}
+
+.reply-card {
+  padding: 22px 28px;
+}
+
+.reply-card + .reply-card {
+  border-top: 1px solid var(--line);
+}
+
+.reply-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.reply-card-header strong {
+  color: var(--ink);
+  font-size: 0.92rem;
+}
+
+.reply-card-header time {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.reply-card-content {
+  margin: 14px 0 0;
+  color: var(--ink);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.reply-status {
+  margin: 0;
+  padding: 26px 28px;
+  color: var(--muted);
+}
+
+.reply-error {
+  color: var(--red);
+}
+
+.reply-form {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  background:
+    rgba(244, 246, 241, 0.45);
+  padding: 24px 28px;
+}
+
+.reply-form label {
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.reply-form textarea {
+  width: 100%;
+  min-height: 130px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 13px 14px;
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.6;
+}
+
+.reply-form textarea:focus {
+  border-color: var(--blue);
+  outline:
+    3px solid
+    rgba(47, 111, 180, 0.15);
+}
+
+.reply-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.reply-message {
+  min-height: 22px;
+  margin: 0;
+  color: var(--red);
+  font-size: 0.86rem;
+}
+
+.reply-submit-button {
+  min-height: 44px;
+  border: 1px solid var(--ink);
+  border-radius: 8px;
+  background: var(--ink);
+  padding: 0 17px;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.reply-submit-button:hover:not(:disabled) {
+  border-color: var(--blue);
+  background: var(--blue);
+  transform: translateY(-1px);
+}
+
+.reply-submit-button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+@media (max-width: 560px) {
+  .discussion-replies-header,
+  .reply-card,
+  .reply-form {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .reply-form-footer {
+    display: grid;
+  }
+
+  .reply-submit-button {
+    width: 100%;
+  }
+}
