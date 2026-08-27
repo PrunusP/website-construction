@@ -260,17 +260,48 @@ async function checkPostOwnership(post) {
   }
 }
 
+async function loadAuthorUsername(authorId) {
+  if (!authorId) {
+    return "未知用户";
+  }
 
-      function renderDiscussion(post) {
-        discussionTitle.textContent =
-          post.title || "无标题讨论";
+  const {
+    data: profile,
+    error
+  } =
+    await window.siteSupabase
+      .from("profiles")
+      .select("username")
+      .eq("id", authorId)
+      .maybeSingle();
 
-        const shortAuthorId =
-          post.author_id?.slice(0, 8)
-          ?? "未知";
+  if (error) {
+    console.warn(
+      "读取作者用户名失败：",
+      error
+    );
 
-        discussionAuthor.textContent =
-          `用户 ${shortAuthorId}`;
+    return `用户 ${authorId.slice(0, 8)}`;
+  }
+
+  return (
+    profile?.username
+    ?? `用户 ${authorId.slice(0, 8)}`
+  );
+}
+
+      async function renderDiscussion(post) {
+  discussionTitle.textContent =
+    post.title || "无标题讨论";
+
+  const authorName =
+    await loadAuthorUsername(
+      post.author_id
+    );
+
+  discussionAuthor.textContent =
+    authorName;
+
 const createdDate =
   new Date(post.created_at);
 
