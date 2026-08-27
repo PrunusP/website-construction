@@ -216,9 +216,17 @@
             }
 
             if (!user) {
-              window.location.href = "../login.html";
-              return;
-            }
+  discussionMessage.textContent =
+    "你尚未登录，登录后才能发表讨论。";
+
+  submitButton.disabled = false;
+
+  showLoginPrompt(
+    "你尚未登录，登录后才能发表讨论。"
+  );
+
+  return;
+}
 
             const { data: post, error: postError } =
               await window.siteSupabase
@@ -381,3 +389,15 @@ contentInput.addEventListener(
   }
 );
 
+
+function showLoginPrompt(message) {
+  const shouldGoToLogin =
+    window.confirm(
+      `${message}\n\n是否现在前往登录页面？`
+    );
+
+  if (shouldGoToLogin) {
+    window.location.href =
+      "../login.html";
+  }
+}
