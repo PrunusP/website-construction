@@ -67,6 +67,36 @@ const deletePostButton =
 
 let currentPost = null;
 
+const replyList =
+  document.getElementById(
+    "replyList"
+  );
+
+const replyCount =
+  document.getElementById(
+    "replyCount"
+  );
+
+const replyForm =
+  document.getElementById(
+    "replyForm"
+  );
+
+const replyContentInput =
+  document.getElementById(
+    "replyContentInput"
+  );
+
+const replyMessage =
+  document.getElementById(
+    "replyMessage"
+  );
+
+const replySubmitButton =
+  document.getElementById(
+    "replySubmitButton"
+  );
+
 
 async function checkPostOwnership(post) {
   const {
@@ -144,6 +174,7 @@ async function checkPostOwnership(post) {
      */
     renderDiscussion(post);
 
+    loadReplies(post.post_id);
     /*
      * 作者检查不阻塞帖子显示。
      */
@@ -478,3 +509,325 @@ if (deletePostButton) {
  * 页面加载完成后读取原帖。
  */
 
+
+async function loadReplies(postId) {
+  replyList.replaceChildren();
+
+  const loadingMessage =
+    document.createElement("p");
+
+  loadingMessage.className =
+    "reply-status";
+
+  loadingMessage.textContent =
+    "正在加载回复……";
+
+  replyList.append(loadingMessage);
+
+  try {
+    const {
+      data: replies,
+      error: repliesError
+    } =
+      await window.siteSupabase
+        .from("replies")
+        .select(`
+          reply_id,
+          post_id,
+          author_id,
+          content,
+          created_at,
+          updated_at
+        `)
+        .eq("post_id", postId)
+        .order("created_at", {
+          ascending: true
+        });
+
+    if (repliesError) {
+      throw repliesError;
+    }
+
+    /*
+     * 收集所有回复作者的用户 ID。
+     */
+    const authorIds = [
+      ...new Set(
+        (replies ?? [])
+          .map(function (reply) {
+            return reply.author_id;
+          })
+          .filter(Boolean)
+      )
+    ];
+
+    let usernameByUserId = {};
+
+    /*
+     * 从 profiles 表读取用户名。
+     */
+    if (authorIds.length > 0) {
+      const {
+        data: profiles,
+        error: profilesError
+      } =
+        await window.siteSupabase
+          .from("profiles")
+          .select("id, username")
+          .in("id", authorIds);
+
+      if (profilesError) {
+        console.warn(
+          "读取回复作者用户名失败：",
+          profilesError
+        );
+      } else {
+        usernameByUserId =
+          Object.fromEntries(
+            (profiles ?? []).map(
+              function (profile) {
+                return [
+                  profile.id,
+                  profile.username
+                ];
+              }
+            )
+          );
+      }
+    }
+
+    replyList.replaceChildren();
+
+    const replyTotal =
+      replies?.length ?? 0;
+
+    replyCount.textContent =
+      `${replyTotal} 条回复`;
+
+    if (replyTotal === 0) {
+      const emptyMessage =
+        document.createElement("p");
+
+      emptyMessage.className =
+        "reply-status";
+
+      emptyMessage.textContent =
+        "暂时还没有回复，来发表第一条回复吧。";
+
+      replyList.append(emptyMessage);
+      return;
+    }
+
+    for (const reply of replies) {
+      const replyElement =
+        createReplyElement(
+          reply,
+          usernameByUserId
+        );
+
+      replyList.append(replyElement);
+    }
+  } catch (error) {
+    console.error(
+      "加载回复失败：",
+      error
+    );
+
+    replyList.replaceChildren();
+
+    const errorMessage =
+      document.createElement("p");
+
+    errorMessage.className =
+      "reply-status reply-error";
+
+    errorMessage.textContent =
+      `回复加载失败：${
+        error?.message ?? "未知错误"
+      }`;
+
+    replyList.append(errorMessage);
+  }
+}
+
+function createReplyElement(
+  reply,
+  usernameByUserId
+) {
+  const article =
+    document.createElement("article");
+
+  article.className =
+    "reply-card";
+
+  article.dataset.replyId =
+    reply.reply_id;
+
+  const header =
+    document.createElement("header");
+
+  header.className =
+    "reply-card-header";
+
+  const author =
+    document.createElement("strong");
+
+  const fallbackAuthor =
+    `用户 ${
+      reply.author_id?.slice(0, 8)
+      ?? "未知"
+    }`;
+
+  author.textContent =
+    usernameByUserId[reply.author_id]
+    ?? fallbackAuthor;
+
+  const time =
+    document.createElement("time");
+
+  time.dateTime =
+    reply.created_at;
+
+  time.textContent =
+    new Date(
+      reply.created_at
+    ).toLocaleString(
+      "zh-CN",
+      {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }
+    );
+
+  header.append(author, time);
+
+  const content =
+    document.createElement("p");
+
+  content.className =
+    "reply-card-content";
+
+  /*
+   * 使用 textContent 防止回复中的文字
+   * 被浏览器当成 HTML 执行。
+   */
+  content.textContent =
+    reply.content;
+
+  article.append(
+    header,
+    content
+  );
+
+  return article;
+}
+
+if (replyForm) {
+  replyForm.addEventListener(
+    "submit",
+    submitReply
+  );
+}
+
+async function submitReply(event) {
+  event.preventDefault();
+
+  if (!currentPost) {
+    replyMessage.textContent =
+      "帖子尚未加载完成。";
+
+    return;
+  }
+
+  const content =
+    replyContentInput.value.trim();
+
+  if (content.length === 0) {
+    replyMessage.textContent =
+      "回复内容不能为空。";
+
+    replyContentInput.focus();
+    return;
+  }
+
+  if (content.length > 3000) {
+    replyMessage.textContent =
+      "回复内容最多 3000 个字符。";
+
+    replyContentInput.focus();
+    return;
+  }
+
+  replySubmitButton.disabled = true;
+
+  replyMessage.textContent =
+    "正在提交回复……";
+
+  try {
+    const {
+      data: { user },
+      error: userError
+    } =
+      await window.siteSupabase.auth.getUser();
+
+    if (userError) {
+      throw userError;
+    }
+
+    if (!user) {
+      window.location.href =
+        "../login.html";
+
+      return;
+    }
+
+    const {
+      error: insertError
+    } =
+      await window.siteSupabase
+        .from("replies")
+        .insert({
+          post_id:
+            currentPost.post_id,
+
+          author_id:
+            user.id,
+
+          content:
+            content
+        });
+
+    if (insertError) {
+      throw insertError;
+    }
+
+    replyContentInput.value = "";
+
+    replyMessage.textContent =
+      "回复发表成功。";
+
+    /*
+     * 重新加载回复列表。
+     */
+    await loadReplies(
+      currentPost.post_id
+    );
+
+    replyMessage.textContent = "";
+  } catch (error) {
+    console.error(
+      "发表回复失败：",
+      error
+    );
+
+    replyMessage.textContent =
+      `回复失败：${
+        error?.message ?? "未知错误"
+      }`;
+  } finally {
+    replySubmitButton.disabled = false;
+  }
+}
