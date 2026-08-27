@@ -1066,3 +1066,106 @@ a {
   color: var(--red) !important;
   font-weight: 700;
 }
+
+/* ================================
+   帖子作者操作按钮
+   ================================ */
+
+.discussion-owner-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(47, 111, 180, 0.03),
+      rgba(24, 128, 92, 0.03)
+    ),
+    rgba(255, 255, 255, 0.72);
+  padding: 18px 28px;
+}
+
+/*
+ * 防止 display:flex 覆盖 HTML 的 hidden 属性。
+ */
+.discussion-owner-actions[hidden] {
+  display: none;
+}
+
+.discussion-owner-actions button {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 16px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+/* 编辑按钮 */
+#editPostButton {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #ffffff;
+}
+
+#editPostButton:hover {
+  border-color: var(--blue);
+  background: var(--blue);
+  transform: translateY(-1px);
+  box-shadow:
+    0 8px 18px rgba(47, 111, 180, 0.2);
+}
+
+/* 删除按钮 */
+#deletePostButton {
+  border-color: rgba(200, 75, 69, 0.45);
+  background: rgba(200, 75, 69, 0.07);
+  color: var(--red);
+}
+
+#deletePostButton:hover {
+  border-color: var(--red);
+  background: var(--red);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow:
+    0 8px 18px rgba(200, 75, 69, 0.2);
+}
+
+.discussion-owner-actions button:focus-visible {
+  outline: 3px solid rgba(47, 111, 180, 0.22);
+  outline-offset: 2px;
+}
+
+.discussion-owner-actions button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 560px) {
+  .discussion-owner-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 16px 18px;
+  }
+
+  .discussion-owner-actions[hidden] {
+    display: none;
+  }
+
+  .discussion-owner-actions button {
+    width: 100%;
+  }
+}
