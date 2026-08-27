@@ -83,120 +83,163 @@ async function checkPostOwnership(post) {
   ownerActions.hidden = !isAuthor;
 }
       async function loadDiscussion() {
-        /*
-         * 从地址中取得帖子 ID。
-         *
-         * 例如：
-         * discussion.html?id=abc123
-         */
-        const parameters =
-          new URLSearchParams(
-            window.location.search
-          );
+  const parameters =
+    new URLSearchParams(
+      window.location.search
+    );
 
-        const postId =
-          parameters.get("id");
+  const postId =
+    parameters.get("id");
 
-        if (!postId) {
-          discussionStatus.textContent =
-            "链接中没有帖子 ID。";
+  if (!postId) {
+    discussionStatus.textContent =
+      "链接中没有帖子 ID。";
 
-          return;
-        }
+    return;
+  }
 
-        try {
-          const { data: post, error } =
-            await window.siteSupabase
-              .from("posts")
-              .select(`
-                post_id,
-                author_id,
-                title,
-                category,
-                tags,
-                content,
-                created_at,
-                updated_at
-              `)
-              .eq("post_id", postId)
-              .single();
+  try {
+    discussionStatus.textContent =
+      "正在连接数据库……";
 
-          
-          if (error) {
-            throw error;
-          }
-          if (!post) {
-            throw new Error("没有找到帖子");
-          }
-          currentPost = post;
-          await checkPostOwnership(post);
+    if (!window.siteSupabase) {
+      throw new Error(
+        "Supabase 客户端没有加载"
+      );
+    }
 
-          renderDiscussion(post);
-        } catch (error) {
-          console.error(
-            "加载讨论失败：",
-            error
-          );
+    const {
+      data: post,
+      error
+    } =
+      await window.siteSupabase
+        .from("posts")
+        .select(`
+          post_id,
+          author_id,
+          title,
+          category,
+          tags,
+          content,
+          created_at,
+          updated_at
+        `)
+        .eq("post_id", postId)
+        .single();
 
-          discussionStatus.textContent =
-            "帖子加载失败。";
-        }
+    if (error) {
+      throw error;
+    }
+
+    if (!post) {
+      throw new Error("没有找到帖子");
+    }
+
+    currentPost = post;
+
+    /*
+     * 查询成功后立即显示。
+     */
+    renderDiscussion(post);
+
+    /*
+     * 作者检查不阻塞帖子显示。
+     */
+    checkPostOwnership(post).catch(
+      function (ownershipError) {
+        console.error(
+          "检查作者身份失败：",
+          ownershipError
+        );
+
+        ownerActions.hidden = true;
       }
+    );
+  } catch (error) {
+    console.error(
+      "加载讨论失败：",
+      error
+    );
+
+    discussionStatus.hidden = false;
+
+    discussionStatus.textContent =
+      `帖子加载失败：${
+        error?.message ?? "未知错误"
+      }`;
+  }
+}
 
       loadDiscussion();
       
-      deletePostButton.addEventListener(
-  "click",
-  async function () {
-    if (!currentPost) {
-      return;
-    }
+   async function deleteCurrentPost() {
+  if (!currentPost) {
+    return;
+  }
 
-    const confirmed = window.confirm(
+  const confirmed =
+    window.confirm(
       "确定要永久删除这个帖子吗？"
     );
 
-    if (!confirmed) {
+  if (!confirmed) {
+    return;
+  }
+
+  deletePostButton.disabled = true;
+
+  try {
+    const {
+      data: { user },
+      error: userError
+    } =
+      await window.siteSupabase.auth.getUser();
+
+    if (userError) {
+      throw userError;
+    }
+
+    if (!user) {
+      window.location.href =
+        "../login.html";
+
       return;
     }
 
-    deletePostButton.disabled = true;
+    const { error: deleteError } =
+      await window.siteSupabase
+        .from("posts")
+        .delete()
+        .eq(
+          "post_id",
+          currentPost.post_id
+        )
+        .eq(
+          "author_id",
+          user.id
+        );
 
-    const {
-  data: { user },
-  error: userError
-} =
-  await window.siteSupabase.auth.getUser();
+    if (deleteError) {
+      throw deleteError;
+    }
 
-if (userError || !user) {
-  alert("请先登录。");
-  deletePostButton.disabled = false;
-  return;
-}
-
-const { error } =
-  await window.siteSupabase
-    .from("posts")
-    .delete()
-    .eq(
-      "post_id",
-      currentPost.post_id
-    )
-    .eq(
-      "author_id",
-      user.id
+    window.location.href =
+      "./index.html";
+  } catch (error) {
+    console.error(
+      "删除帖子失败：",
+      error
     );
 
-    if (error) {
-      console.error("删除帖子失败：", error);
-      alert(`删除失败：${error.message}`);
-      deletePostButton.disabled = false;
-      return;
-    }
+    alert(
+      `删除失败：${
+        error?.message ?? "未知错误"
+      }`
+    );
 
-    window.location.href = "./index.html";
+    deletePostButton.disabled = false;
   }
-);
+}
       function renderDiscussion(post) {
         discussionTitle.textContent =
           post.title || "无标题讨论";
@@ -304,16 +347,22 @@ if (post.updated_at) {
 
       
 
-      editPostButton.addEventListener(
-        "click",
-        function () {
-          if (!currentPost) {
-            return;
-          }
+      if (editPostButton) {
+  editPostButton.addEventListener(
+    "click",
+    function () {
+      if (!currentPost) {
+        return;
+      }
 
-          window.location.href =
-            `./edit_discussion.html?id=${encodeURIComponent(
-              currentPost.post_id
-            )}`;
-        }
-      );
+      window.location.href =
+        `./edit_discussion.html?id=${encodeURIComponent(
+          currentPost.post_id
+        )}`;
+    }
+  );
+} else {
+  console.error(
+    "没有找到 #editPostButton"
+  );
+}
