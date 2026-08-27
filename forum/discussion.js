@@ -856,18 +856,57 @@ closeReplyComposer();
   }
 }
 
+let replyCloseTimer = null;
 
+
+/*
+ * 打开回复抽屉。
+ */
 function openReplyComposer() {
-  if (!replyComposer) {
+  if (
+    !replyComposer
+    || !replyComposerBackdrop
+  ) {
+    console.error(
+      "找不到回复抽屉元素"
+    );
+
     return;
   }
 
-  replyComposer.classList.add(
-    "is-open"
-  );
+  /*
+   * 防止上一次关闭计时器
+   * 在重新打开后又把抽屉隐藏。
+   */
+  if (replyCloseTimer) {
+    window.clearTimeout(
+      replyCloseTimer
+    );
 
-  replyComposerBackdrop?.classList.add(
-    "is-visible"
+    replyCloseTimer = null;
+  }
+
+  /*
+   * 先取消 hidden，
+   * 让元素参与页面渲染。
+   */
+  replyComposer.hidden = false;
+  replyComposerBackdrop.hidden = false;
+
+  /*
+   * 下一帧再添加动画 class，
+   * 浏览器才能产生滑入动画。
+   */
+  window.requestAnimationFrame(
+    function () {
+      replyComposer.classList.add(
+        "is-open"
+      );
+
+      replyComposerBackdrop.classList.add(
+        "is-visible"
+      );
+    }
   );
 
   replyComposer.setAttribute(
@@ -875,7 +914,7 @@ function openReplyComposer() {
     "false"
   );
 
-  replyComposerBackdrop?.setAttribute(
+  replyComposerBackdrop.setAttribute(
     "aria-hidden",
     "false"
   );
@@ -889,28 +928,35 @@ function openReplyComposer() {
     "reply-composer-open"
   );
 
-  /*
-   * 等待抽屉开始显示后，
-   * 将输入焦点放到回复框。
-   */
   window.setTimeout(
     function () {
       replyContentInput?.focus();
     },
-    220
+    280
   );
 }
 
+
+/*
+ * 关闭回复抽屉。
+ */
 function closeReplyComposer() {
-  if (!replyComposer) {
+  if (
+    !replyComposer
+    || !replyComposerBackdrop
+  ) {
     return;
   }
 
+  /*
+   * 先移除动画 class，
+   * 抽屉开始向下滑动。
+   */
   replyComposer.classList.remove(
     "is-open"
   );
 
-  replyComposerBackdrop?.classList.remove(
+  replyComposerBackdrop.classList.remove(
     "is-visible"
   );
 
@@ -919,7 +965,7 @@ function closeReplyComposer() {
     "true"
   );
 
-  replyComposerBackdrop?.setAttribute(
+  replyComposerBackdrop.setAttribute(
     "aria-hidden",
     "true"
   );
@@ -933,37 +979,73 @@ function closeReplyComposer() {
     "reply-composer-open"
   );
 
+  /*
+   * 等关闭动画结束后，
+   * 再设置 hidden。
+   */
+  replyCloseTimer =
+    window.setTimeout(
+      function () {
+        if (
+          !replyComposer.classList.contains(
+            "is-open"
+          )
+        ) {
+          replyComposer.hidden = true;
+          replyComposerBackdrop.hidden = true;
+        }
+
+        replyCloseTimer = null;
+      },
+      280
+    );
+
   openReplyButton?.focus();
 }
 
-openReplyButton?.addEventListener(
-  "click",
-  openReplyComposer
-);
 
-closeReplyButton?.addEventListener(
-  "click",
-  closeReplyComposer
-);
 
-cancelReplyButton?.addEventListener(
-  "click",
-  closeReplyComposer
-);
+if (openReplyButton) {
+  openReplyButton.addEventListener(
+    "click",
+    openReplyComposer
+  );
+}
 
-replyComposerBackdrop?.addEventListener(
-  "click",
-  closeReplyComposer
-);
+if (closeReplyButton) {
+  closeReplyButton.addEventListener(
+    "click",
+    closeReplyComposer
+  );
+}
+
+if (cancelReplyButton) {
+  cancelReplyButton.addEventListener(
+    "click",
+    function () {
+      closeReplyComposer();
+    }
+  );
+}
+
+if (replyComposerBackdrop) {
+  replyComposerBackdrop.addEventListener(
+    "click",
+    closeReplyComposer
+  );
+}
 
 document.addEventListener(
   "keydown",
   function (event) {
+    const isOpen =
+      replyComposer?.classList.contains(
+        "is-open"
+      );
+
     if (
       event.key === "Escape"
-      && replyComposer?.classList.contains(
-        "is-open"
-      )
+      && isOpen
     ) {
       closeReplyComposer();
     }
