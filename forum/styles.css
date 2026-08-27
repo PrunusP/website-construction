@@ -940,9 +940,22 @@ a {
 .discussion-detail-content {
   min-height: 220px;
   padding: 28px;
-  line-height: 1.8;
+  line-height: 1.55;
   overflow-wrap: anywhere;
-  white-space: pre-wrap;
+}
+
+.discussion-detail-content p {
+  margin: 0.65em 0;
+}
+
+.discussion-detail-content li {
+  margin: 0.25em 0;
+}
+
+.discussion-detail-content ul,
+.discussion-detail-content ol {
+  margin: 0.7em 0;
+  padding-left: 1.6em;
 }
 
 .markdown-preview-panel {
