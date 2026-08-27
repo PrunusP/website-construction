@@ -24,7 +24,7 @@
         {value: "criticize",label: "文学批评"},
         {value: "novel",label: "小说"},
         {value: "other",label: "其他"}
-        ]
+        ],
 
         chat: [
           {value: "other",label: "其他"},
