@@ -158,6 +158,10 @@ async function loadCurrentUser() {
     literature: document.getElementById(
       "literaturePostList"
     ),
+
+    chat: document.getElementById(
+      "chatPostList"
+    ),
   };
 
   /*
@@ -180,6 +184,7 @@ async function loadCurrentUser() {
     criticize: "文学批评",
     novel: "小说"
 
+ 
   };
 
   async function loadForumPosts() {
@@ -382,8 +387,8 @@ async function loadCurrentUser() {
       document.createElement("span");
 
     /*
-     * 目前数据库没有公开用户邮箱，
-     * 因此先显示用户 UUID 的前八位。
+     * 显示用户名，
+     * 若没有用户名显示用户 UUID 的前八位。
      */
     const username =
       usernameByUserId[post.author_id]
@@ -410,7 +415,7 @@ async function loadCurrentUser() {
     );
 
     return card;
-  }
+  } 
   
   /*
    * 如果某个区域没有帖子，显示空状态。
