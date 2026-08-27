@@ -25,6 +25,10 @@
         {value: "novel",label: "小说"},
         {value: "other",label: "其他"}
         ]
+
+        chat: [
+          {value: "other",label: "其他"},
+        ]
       };
 
 /*
@@ -274,7 +278,7 @@ categoryInput.addEventListener(
 
 
 /*
- * 标签最多只能选择三个。
+ * 标签最多只能选择5个。
  */
 tagsContainer.addEventListener(
   "change",
@@ -291,11 +295,11 @@ tagsContainer.addEventListener(
     const selectedTags =
       getSelectedTags();
 
-    if (selectedTags.length > 3) {
+    if (selectedTags.length > 5) {
       target.checked = false;
 
       showMessage(
-        "最多只能选择 3 个标签。",
+        "最多只能选择 5 个标签。",
         true
       );
 
@@ -525,9 +529,9 @@ editDiscussionForm.addEventListener(
       return;
     }
 
-    if (tags.length > 3) {
+    if (tags.length > 5) {
       showMessage(
-        "最多只能选择 3 个标签。",
+        "最多只能选择 5 个标签。",
         true
       );
 
