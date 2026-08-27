@@ -77,18 +77,32 @@
   aria-labelledby="repliesTitle"
 >
   <header class="discussion-replies-header">
-    <div>
-      <p class="eyebrow">REPLIES</p>
+  <div>
+    <p class="eyebrow">
+      REPLIES
+    </p>
 
-      <h2 id="repliesTitle">
-        回复
-      </h2>
-    </div>
+    <h2 id="repliesTitle">
+      回复
+    </h2>
+  </div>
 
+  <div class="reply-header-actions">
     <span id="replyCount">
       0 条回复
     </span>
-  </header>
+
+    <button
+      class="open-reply-button"
+      id="openReplyButton"
+      type="button"
+      aria-controls="replyComposer"
+      aria-expanded="false"
+    >
+      回复
+    </button>
+  </div>
+</header>
 
   <!-- 回复列表 -->
   <div
@@ -100,14 +114,57 @@
     </p>
   </div>
 
-  <!-- 回复表单 -->
+</section>
+    </main>
+
+    <!-- 回复抽屉背景 -->
+<div
+  class="reply-composer-backdrop"
+  id="replyComposerBackdrop"
+  aria-hidden="true"
+></div>
+
+
+<!-- 屏幕底部回复抽屉 -->
+<aside
+  class="reply-composer"
+  id="replyComposer"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="replyComposerTitle"
+  aria-hidden="true"
+>
+  <div class="reply-composer-handle"></div>
+
+  <header class="reply-composer-header">
+    <div>
+      <p class="eyebrow">
+        WRITE A REPLY
+      </p>
+
+      <h2 id="replyComposerTitle">
+        发表回复
+      </h2>
+    </div>
+
+    <button
+      class="close-reply-button"
+      id="closeReplyButton"
+      type="button"
+      aria-label="关闭回复框"
+      title="关闭"
+    >
+      ×
+    </button>
+  </header>
+
   <form
     class="reply-form"
     id="replyForm"
     novalidate
   >
     <label for="replyContentInput">
-      发表回复
+      回复内容
     </label>
 
     <textarea
@@ -115,7 +172,7 @@
       name="content"
       minlength="1"
       maxlength="3000"
-      rows="6"
+      rows="7"
       placeholder="写下你的回复……"
       required
     ></textarea>
@@ -128,17 +185,26 @@
         aria-live="polite"
       ></p>
 
-      <button
-        class="reply-submit-button"
-        id="replySubmitButton"
-        type="submit"
-      >
-        提交回复
-      </button>
+      <div class="reply-form-actions">
+        <button
+          class="reply-cancel-button"
+          id="cancelReplyButton"
+          type="button"
+        >
+          取消
+        </button>
+
+        <button
+          class="reply-submit-button"
+          id="replySubmitButton"
+          type="submit"
+        >
+          提交回复
+        </button>
+      </div>
     </div>
   </form>
-</section>
-    </main>
+</aside>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../site-cloud-helper.js"></script>
