@@ -174,12 +174,13 @@ async function checkPostOwnership(post) {
       
    async function deleteCurrentPost() {
   if (!currentPost) {
+    alert("帖子还没有加载完成。");
     return;
   }
 
   const confirmed =
     window.confirm(
-      "确定要永久删除这个帖子吗？"
+      "确定要永久删除这个帖子吗？此操作无法撤销。"
     );
 
   if (!confirmed) {
@@ -187,6 +188,8 @@ async function checkPostOwnership(post) {
   }
 
   deletePostButton.disabled = true;
+  deletePostButton.textContent =
+    "正在删除……";
 
   try {
     const {
@@ -206,7 +209,10 @@ async function checkPostOwnership(post) {
       return;
     }
 
-    const { error: deleteError } =
+    const {
+      data: deletedPost,
+      error: deleteError
+    } =
       await window.siteSupabase
         .from("posts")
         .delete()
@@ -217,14 +223,23 @@ async function checkPostOwnership(post) {
         .eq(
           "author_id",
           user.id
-        );
+        )
+        .select("post_id")
+        .maybeSingle();
 
     if (deleteError) {
       throw deleteError;
     }
 
-    window.location.href =
-      "./index.html";
+    if (!deletedPost) {
+      throw new Error(
+        "帖子没有被删除，请检查 Supabase 删除权限。"
+      );
+    }
+
+    window.location.replace(
+      "./index.html"
+    );
   } catch (error) {
     console.error(
       "删除帖子失败：",
@@ -238,8 +253,12 @@ async function checkPostOwnership(post) {
     );
 
     deletePostButton.disabled = false;
+    deletePostButton.textContent =
+      "删除帖子";
   }
 }
+
+
       function renderDiscussion(post) {
         discussionTitle.textContent =
           post.title || "无标题讨论";
@@ -366,3 +385,4 @@ if (post.updated_at) {
     "没有找到 #editPostButton"
   );
 }
+
