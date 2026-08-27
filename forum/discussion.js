@@ -123,6 +123,11 @@ const replyComposerBackdrop =
     "replyComposerBackdrop"
   );
 
+  const replyMarkdownPreview =
+  document.getElementById(
+    "replyMarkdownPreview"
+  );
+
 async function checkPostOwnership(post) {
   const {
     data: { user },
@@ -730,17 +735,27 @@ function createReplyElement(
   header.append(author, time);
 
   const content =
-    document.createElement("p");
+  document.createElement("div");
 
-  content.className =
-    "reply-card-content";
+content.className =
+  "reply-card-content markdown-body";
 
-  /*
-   * 使用 textContent 防止回复中的文字
-   * 被浏览器当成 HTML 执行。
-   */
-  content.textContent =
-    reply.content;
+const unsafeHtml =
+  marked.parse(
+    reply.content ?? ""
+  );
+
+const safeHtml =
+  DOMPurify.sanitize(
+    unsafeHtml,
+    {
+      USE_PROFILES: {
+        html: true
+      }
+    }
+  );
+
+content.innerHTML = safeHtml;
 
   article.append(
     header,
@@ -830,6 +845,11 @@ async function submitReply(event) {
     }
 
    replyContentInput.value = "";
+
+   renderReplyMarkdown(
+  replyMarkdownPreview,
+  ""
+);
 
 replyMessage.textContent =
   "回复发表成功。";
@@ -927,6 +947,11 @@ function openReplyComposer() {
   document.body.classList.add(
     "reply-composer-open"
   );
+
+  renderReplyMarkdown(
+  replyMarkdownPreview,
+  replyContentInput?.value ?? ""
+);
 
   window.setTimeout(
     function () {
@@ -1049,5 +1074,79 @@ document.addEventListener(
     ) {
       closeReplyComposer();
     }
+  }
+);
+
+
+function renderReplyMarkdown(
+  targetElement,
+  markdownText
+) {
+  if (!targetElement) {
+    return;
+  }
+
+  const trimmedText =
+    markdownText.trim();
+
+  /*
+   * 输入为空时显示默认提示。
+   */
+  if (!trimmedText) {
+    targetElement.replaceChildren();
+
+    const emptyMessage =
+      document.createElement("p");
+
+    emptyMessage.className =
+      "markdown-preview-empty";
+
+    emptyMessage.textContent =
+      "Markdown 预览会显示在这里";
+
+    targetElement.append(emptyMessage);
+    return;
+  }
+
+  try {
+    /*
+     * Markdown 转换为 HTML。
+     */
+    const unsafeHtml =
+      marked.parse(markdownText);
+
+    /*
+     * 删除可能存在的危险 HTML。
+     */
+    const safeHtml =
+      DOMPurify.sanitize(
+        unsafeHtml,
+        {
+          USE_PROFILES: {
+            html: true
+          }
+        }
+      );
+
+    targetElement.innerHTML =
+      safeHtml;
+  } catch (error) {
+    console.error(
+      "回复 Markdown 渲染失败：",
+      error
+    );
+
+    targetElement.textContent =
+      "预览生成失败，请检查 Markdown 格式。";
+  }
+}
+
+replyContentInput?.addEventListener(
+  "input",
+  function () {
+    renderReplyMarkdown(
+      replyMarkdownPreview,
+      replyContentInput.value
+    );
   }
 );
