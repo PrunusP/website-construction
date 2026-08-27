@@ -818,11 +818,15 @@ async function submitReply(event) {
     }
 
     if (!user) {
-      window.location.href =
-        "../login.html";
+  replyMessage.textContent =
+    "登录状态已失效，请重新登录后发表回复。";
 
-      return;
-    }
+  showLoginPrompt(
+    "登录状态已失效，请重新登录后发表回复。"
+  );
+
+  return;
+}
 
     const {
       error: insertError
@@ -1033,7 +1037,7 @@ function closeReplyComposer() {
 if (openReplyButton) {
   openReplyButton.addEventListener(
     "click",
-    openReplyComposer
+    handleOpenReply
   );
 }
 
@@ -1150,3 +1154,66 @@ replyContentInput?.addEventListener(
     );
   }
 );
+
+function showLoginPrompt(message) {
+  const shouldGoToLogin =
+    window.confirm(
+      `${message}\n\n是否现在前往登录页面？`
+    );
+
+  if (shouldGoToLogin) {
+    goToLoginWithReturnUrl();
+  }
+}
+
+async function handleOpenReply() {
+  openReplyButton.disabled = true;
+
+  try {
+    const {
+      data: { user },
+      error
+    } =
+      await window.siteSupabase.auth.getUser();
+
+    if (error) {
+      throw error;
+    }
+
+    if (!user) {
+      showLoginPrompt(
+        "你尚未登录，登录后才能回复这篇讨论。"
+      );
+
+      return;
+    }
+
+    /*
+     * 已登录才打开回复抽屉。
+     */
+    openReplyComposer();
+  } catch (error) {
+    console.error(
+      "检查登录状态失败：",
+      error
+    );
+
+    window.alert(
+      `无法确认登录状态：${
+        error?.message ?? "未知错误"
+      }`
+    );
+  } finally {
+    openReplyButton.disabled = false;
+  }
+}
+
+function goToLoginWithReturnUrl() {
+  const returnUrl =
+    window.location.href;
+
+  window.location.href =
+    `../login.html?returnTo=${encodeURIComponent(
+      returnUrl
+    )}`;
+}
