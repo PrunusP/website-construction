@@ -1371,3 +1371,349 @@ a {
     width: 100%;
   }
 }
+
+/* ================================
+   回复标题右侧操作区
+   ================================ */
+
+.reply-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#replyCount {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.open-reply-button {
+  min-height: 42px;
+  border: 1px solid var(--ink);
+  border-radius: 8px;
+  background: var(--ink);
+  padding: 0 17px;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.open-reply-button:hover {
+  border-color: var(--blue);
+  background: var(--blue);
+  transform: translateY(-1px);
+  box-shadow:
+    0 8px 18px
+    rgba(47, 111, 180, 0.2);
+}
+
+.open-reply-button:focus-visible {
+  outline:
+    3px solid
+    rgba(47, 111, 180, 0.22);
+  outline-offset: 2px;
+}
+
+
+/* ================================
+   回复抽屉背景
+   ================================ */
+
+.reply-composer-backdrop {
+  position: fixed;
+  z-index: 299;
+  inset: 0;
+  background:
+    rgba(25, 33, 42, 0.32);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 220ms ease,
+    visibility 220ms ease;
+}
+
+.reply-composer-backdrop.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+
+/* ================================
+   底部回复抽屉
+   ================================ */
+
+.reply-composer {
+  position: fixed;
+  z-index: 300;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: min(820px, calc(100% - 32px));
+  max-height: min(680px, 88vh);
+  max-height: min(680px, 88dvh);
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 14px 14px 0 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(47, 111, 180, 0.04),
+      transparent 35%
+    ),
+    rgba(255, 255, 255, 0.99);
+  box-shadow:
+    0 -24px 55px
+    rgba(25, 33, 42, 0.18);
+  overflow-y: auto;
+
+  /*
+   * 默认藏在屏幕下方。
+   */
+  transform: translateY(110%);
+  visibility: hidden;
+  pointer-events: none;
+
+  transition:
+    transform 260ms ease,
+    visibility 260ms ease;
+}
+
+.reply-composer.is-open {
+  transform: translateY(0);
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.reply-composer-handle {
+  width: 46px;
+  height: 5px;
+  margin: 10px auto 0;
+  border-radius: 999px;
+  background:
+    rgba(102, 113, 126, 0.38);
+}
+
+.reply-composer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--line);
+  padding: 18px 28px;
+}
+
+.reply-composer-header .eyebrow {
+  margin: 0 0 6px;
+  color: var(--blue);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.reply-composer-header h2 {
+  margin: 0;
+  font-size: 1.45rem;
+}
+
+.close-reply-button {
+  display: inline-grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--muted);
+  font: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    color 150ms ease,
+    background 150ms ease;
+}
+
+.close-reply-button:hover {
+  border-color: var(--red);
+  background:
+    rgba(200, 75, 69, 0.07);
+  color: var(--red);
+}
+
+
+/* ================================
+   抽屉中的回复表单
+   ================================ */
+
+.reply-composer .reply-form {
+  display: grid;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  padding: 24px 28px 30px;
+}
+
+.reply-composer .reply-form label {
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.reply-composer .reply-form textarea {
+  width: 100%;
+  min-height: 170px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 13px 14px;
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.6;
+}
+
+.reply-composer
+.reply-form textarea:focus {
+  border-color: var(--blue);
+  outline:
+    3px solid
+    rgba(47, 111, 180, 0.15);
+}
+
+.reply-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.reply-message {
+  min-height: 22px;
+  margin: 0;
+  color: var(--red);
+  font-size: 0.86rem;
+}
+
+.reply-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reply-cancel-button,
+.reply-submit-button {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 17px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.reply-cancel-button {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.reply-cancel-button:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.reply-submit-button {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #ffffff;
+}
+
+.reply-submit-button:hover:not(:disabled) {
+  border-color: var(--blue);
+  background: var(--blue);
+}
+
+.reply-submit-button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+
+/*
+ * 打开回复抽屉时阻止页面背景滚动。
+ */
+body.reply-composer-open {
+  overflow: hidden;
+}
+
+
+/* ================================
+   移动端
+   ================================ */
+
+@media (max-width: 560px) {
+  .discussion-replies-header {
+    align-items: center;
+  }
+
+  .reply-header-actions {
+    gap: 8px;
+  }
+
+  #replyCount {
+    display: none;
+  }
+
+  .open-reply-button {
+    min-height: 40px;
+    padding: 0 14px;
+  }
+
+  .reply-composer {
+    width: 100%;
+    max-height: 92dvh;
+    border-right: 0;
+    border-left: 0;
+  }
+
+  .reply-composer-header {
+    padding:
+      16px
+      18px;
+  }
+
+  .reply-composer .reply-form {
+    padding:
+      20px
+      18px
+      24px;
+  }
+
+  .reply-form-footer {
+    display: grid;
+  }
+
+  .reply-form-actions {
+    display: grid;
+    grid-template-columns:
+      1fr 1fr;
+  }
+
+  .reply-cancel-button,
+  .reply-submit-button {
+    width: 100%;
+  }
+}
+
