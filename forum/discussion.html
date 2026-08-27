@@ -71,6 +71,73 @@
           </button>
         </div>
       </article>
+
+      <section
+  class="discussion-replies"
+  aria-labelledby="repliesTitle"
+>
+  <header class="discussion-replies-header">
+    <div>
+      <p class="eyebrow">REPLIES</p>
+
+      <h2 id="repliesTitle">
+        回复
+      </h2>
+    </div>
+
+    <span id="replyCount">
+      0 条回复
+    </span>
+  </header>
+
+  <!-- 回复列表 -->
+  <div
+    class="reply-list"
+    id="replyList"
+  >
+    <p class="reply-status">
+      正在加载回复……
+    </p>
+  </div>
+
+  <!-- 回复表单 -->
+  <form
+    class="reply-form"
+    id="replyForm"
+    novalidate
+  >
+    <label for="replyContentInput">
+      发表回复
+    </label>
+
+    <textarea
+      id="replyContentInput"
+      name="content"
+      minlength="1"
+      maxlength="3000"
+      rows="6"
+      placeholder="写下你的回复……"
+      required
+    ></textarea>
+
+    <div class="reply-form-footer">
+      <p
+        class="reply-message"
+        id="replyMessage"
+        role="status"
+        aria-live="polite"
+      ></p>
+
+      <button
+        class="reply-submit-button"
+        id="replySubmitButton"
+        type="submit"
+      >
+        提交回复
+      </button>
+    </div>
+  </form>
+</section>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
