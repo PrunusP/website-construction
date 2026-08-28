@@ -149,16 +149,17 @@ async function loadCurrentUser() {
     /*
      * 检查当前用户是不是管理员。
      */
-    const {
-      data: isAdmin,
-      error: adminError
-    } =
-      await window.siteSupabase.rpc(
-        "is_admin",
-        {
-          check_user_id: user.id
-        }
-      );
+
+      const {
+  data: adminRole,
+  error: adminError
+} =
+  await window.siteSupabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id)
+    .eq("role", "admin")
+    .maybeSingle();
 
     if (adminError) {
       console.error(
@@ -170,11 +171,12 @@ async function loadCurrentUser() {
       return;
     }
 
-    /*
-     * 只有管理员才能看到入口。
-     */
-    adminPageButton.hidden =
-      isAdmin !== true;
+/*
+ * 找到 admin 记录就显示按钮，
+ * 没找到就隐藏按钮。
+ */
+adminPageButton.hidden =
+  adminRole?.role !== "admin";
   } catch (error) {
     console.error(
       "读取当前用户失败：",
