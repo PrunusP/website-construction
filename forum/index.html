@@ -183,15 +183,25 @@
         id="drawerContent"
       >
         <div class="forum-user">
-          <span class="forum-user-label">
-            当前账号
-          </span>
+  <span class="forum-user-label">
+    当前账号
+  </span>
 
-          <!-- 用户邮箱由 JavaScript 写入 -->
-          <strong id="userGreeting">
-            Hi, 正在读取……
-          </strong>
-        </div>
+  <div class="forum-user-row">
+    <strong id="userGreeting">
+      Hi, 正在读取……
+    </strong>
+
+    <a
+      class="forum-admin-button"
+      id="adminPageButton"
+      href="./admin.html"
+      hidden
+    >
+      进入管理员页面
+    </a>
+  </div>
+</div>
 
         <a
           class="forum-start-button"
