@@ -13,6 +13,11 @@
           "startDiscussionButton"
         );
 
+        const adminPageButton =
+  document.getElementById(
+    "adminPageButton"
+  );
+
       function setDrawerOpen(isOpen) {
         forumDrawer.classList.toggle(
           "is-open",
@@ -75,6 +80,11 @@
         }
       );
 async function loadCurrentUser() {
+  /*
+   * 默认隐藏管理员入口。
+   */
+  adminPageButton.hidden = true;
+
   try {
     const {
       data: { user },
@@ -86,6 +96,9 @@ async function loadCurrentUser() {
       throw userError;
     }
 
+    /*
+     * 没有登录。
+     */
     if (!user) {
       userGreeting.textContent =
         "Hi, 访客";
@@ -102,12 +115,15 @@ async function loadCurrentUser() {
     }
 
     /*
-     * 先使用 Auth metadata 中的用户名作为备用值。
+     * 先使用 Auth metadata 中的用户名。
      */
     let username =
       user.user_metadata?.username
       ?? "用户";
 
+    /*
+     * 从 profiles 表读取用户名。
+     */
     const {
       data: profile,
       error: profileError
@@ -119,12 +135,8 @@ async function loadCurrentUser() {
         .maybeSingle();
 
     if (profileError) {
-      /*
-       * profiles 读取失败时不让整个功能失败，
-       * 继续显示 metadata 中的用户名。
-       */
       console.warn(
-        "读取 profile 失败，将使用 metadata：",
+        "读取用户资料失败：",
         profileError
       );
     } else if (profile?.username) {
@@ -133,17 +145,48 @@ async function loadCurrentUser() {
 
     userGreeting.textContent =
       `Hi, ${username}`;
+
+    /*
+     * 检查当前用户是不是管理员。
+     */
+    const {
+      data: isAdmin,
+      error: adminError
+    } =
+      await window.siteSupabase.rpc(
+        "is_admin",
+        {
+          check_user_id: user.id
+        }
+      );
+
+    if (adminError) {
+      console.error(
+        "检查管理员身份失败：",
+        adminError
+      );
+
+      adminPageButton.hidden = true;
+      return;
+    }
+
+    /*
+     * 只有管理员才能看到入口。
+     */
+    adminPageButton.hidden =
+      isAdmin !== true;
   } catch (error) {
     console.error(
-      "读取用户资料失败：",
+      "读取当前用户失败：",
       error
     );
 
     userGreeting.textContent =
       "Hi, 访客";
+
+    adminPageButton.hidden = true;
   }
 }
-
       loadCurrentUser();
 
 
@@ -341,6 +384,23 @@ async function loadCurrentUser() {
      * 使用 textContent，避免帖子内容被当成 HTML 执行。
      */
     title.textContent = post.title || "无标题讨论";
+
+if (post.isPinned) {
+  const pinIcon =
+    document.createElement("span");
+
+  pinIcon.className =
+    "forum-post-pin";
+
+  pinIcon.textContent = "📌";
+
+  pinIcon.setAttribute(
+    "aria-label",
+    "置顶帖子"
+  );
+
+  title.append(" ", pinIcon);
+}
 
     const time =
       document.createElement("time");
