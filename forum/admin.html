@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+
+    <title>管理员页面</title>
+
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./admin.css" />
+  </head>
+
+  <body class="discussion-editor-page">
+    <main class="discussion-editor-shell">
+      <header class="discussion-editor-header">
+        <p class="eyebrow">ADMINISTRATION</p>
+        <h1>管理员页面</h1>
+        <p>禁言用户或将指定帖子置顶。</p>
+      </header>
+
+      <p
+        class="admin-page-status"
+        id="adminPageStatus"
+        role="status"
+        aria-live="polite"
+      >
+        正在检查管理员权限……
+      </p>
+
+      <form
+        class="discussion-form admin-form"
+        id="adminForm"
+        novalidate
+        hidden
+      >
+        <!-- 第一个框：选择操作 -->
+        <fieldset class="discussion-tags-field admin-panel">
+          <legend>1. 选择操作</legend>
+
+          <p class="admin-panel-help">
+            请选择需要执行的管理员操作
+          </p>
+
+          <div class="discussion-tags">
+            <label class="discussion-tag-option">
+              <input
+                type="radio"
+                name="adminAction"
+                value="mute"
+                checked
+              />
+              <span>禁言用户</span>
+            </label>
+
+            <label class="discussion-tag-option">
+              <input
+                type="radio"
+                name="adminAction"
+                value="pin"
+              />
+              <span>置顶帖子</span>
+            </label>
+          </div>
+
+          <div class="admin-mute-options" id="muteOptions">
+            <label class="discussion-field">
+              <span>禁言时间</span>
+
+              <select id="muteDurationInput">
+                <option value="1 hour">1 小时</option>
+                <option value="1 day">1 天</option>
+                <option value="7 days">7 天</option>
+                <option value="30 days">30 天</option>
+                <option value="">永久禁言</option>
+              </select>
+            </label>
+
+            <label class="discussion-field">
+              <span>禁言原因（可选）</span>
+
+              <input
+                id="muteReasonInput"
+                type="text"
+                maxlength="200"
+                placeholder="填写禁言原因"
+              />
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- 第二个框：填写目标 -->
+        <fieldset class="discussion-tags-field admin-panel">
+          <legend>2. 填写目标</legend>
+
+          <label class="discussion-field" for="targetInput">
+            <span id="targetLabel">用户名</span>
+
+            <input
+              id="targetInput"
+              type="text"
+              autocomplete="off"
+              maxlength="120"
+              placeholder="填写需要禁言的用户名"
+              required
+            />
+
+            <small id="targetHelp">
+              系统会通过 profiles 表查找这个用户名
+            </small>
+          </label>
+        </fieldset>
+
+        <!-- 第三个框：确认提交 -->
+        <fieldset class="discussion-tags-field admin-panel">
+          <legend>3. 提交操作</legend>
+
+          <p
+            class="discussion-message"
+            id="adminMessage"
+            role="status"
+            aria-live="polite"
+          ></p>
+
+          <div class="discussion-actions">
+            <a
+              class="discussion-cancel-button"
+              href="./index.html"
+            >
+              返回论坛
+            </a>
+
+            <button
+              class="discussion-submit-button"
+              id="adminSubmitButton"
+              type="submit"
+            >
+              确认禁言
+            </button>
+          </div>
+        </fieldset>
+      </form>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../site-cloud-helper.js"></script>
+    <script src="./admin.js"></script>
+  </body>
+</html>
