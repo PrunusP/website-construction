@@ -1873,3 +1873,72 @@ body.reply-composer-open {
     gap: 7px;
   }
 }
+
+.forum-post-pin {
+  display: inline-block;
+  margin-left: 6px;
+  color: #c62828;
+  font-size: 0.85em;
+  vertical-align: 0.08em;
+}
+
+.admin-wrench {
+  display: inline-block;
+  margin-left: 4px;
+  color: #c62828;
+  font-size: 0.82em;
+  font-weight: 800;
+  vertical-align: 0.08em;
+} 
+
+
+.forum-user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+/*
+ * 覆盖原来 strong 上面的 margin，
+ * 因为现在间距由 forum-user-row 控制。
+ */
+.forum-user-row strong {
+  min-width: 0;
+  margin-top: 0;
+}
+
+.forum-admin-button {
+  flex: 0 0 auto;
+  border: 1px solid rgba(190, 40, 40, 0.3);
+  border-radius: 6px;
+  background: rgba(190, 40, 40, 0.07);
+  padding: 7px 9px;
+  color: #b3261e;
+  font-size: 0.76rem;
+  font-weight: 750;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.forum-admin-button:hover {
+  border-color: #b3261e;
+  background: rgba(190, 40, 40, 0.13);
+  color: #8f1d17;
+  transform: translateY(-1px);
+}
+
+/*
+ * 确保 hidden 属性一定能隐藏按钮。
+ */
+.forum-admin-button[hidden] {
+  display: none;
+} 
