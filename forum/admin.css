@@ -1,0 +1,45 @@
+.admin-page-status {
+  margin: 28px 0 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  color: var(--muted);
+}
+
+.admin-form[hidden],
+.admin-mute-options[hidden],
+.admin-page-status[hidden] {
+  display: none;
+}
+
+.admin-panel {
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow);
+}
+
+.admin-panel-help {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.admin-mute-options {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 22px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+
+.admin-panel .discussion-actions {
+  padding-top: 0;
+}
+
+@media (max-width: 620px) {
+  .admin-mute-options {
+    grid-template-columns: 1fr;
+  }
+}
