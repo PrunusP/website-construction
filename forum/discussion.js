@@ -144,92 +144,158 @@ async function checkPostOwnership(post) {
 
   ownerActions.hidden = !isAuthor;
 }
-      async function loadDiscussion() {
-  const parameters =
-    new URLSearchParams(
-      window.location.search
-    );
+      async function loadReplies(postId) {
+  replyList.replaceChildren();
 
-  const postId =
-    parameters.get("id");
+  const loadingMessage =
+    document.createElement("p");
 
-  if (!postId) {
-    discussionStatus.textContent =
-      "链接中没有帖子 ID。";
+  loadingMessage.className =
+    "reply-status";
 
-    return;
-  }
+  loadingMessage.textContent =
+    "正在加载回复……";
+
+  replyList.append(loadingMessage);
 
   try {
-    discussionStatus.textContent =
-      "正在连接数据库……";
+    /*
+     * 获取当前登录用户。
+     * 未登录时 user 为 null。
+     */
+    const {
+      data: { user },
+      error: userError
+    } =
+      await window.siteSupabase.auth.getUser();
 
-    if (!window.siteSupabase) {
-      throw new Error(
-        "Supabase 客户端没有加载"
+    if (userError) {
+      console.warn(
+        "读取登录用户失败：",
+        userError
       );
     }
 
+    const currentUserId =
+      user?.id ?? null;
+
     const {
-      data: post,
-      error
+      data: replies,
+      error: repliesError
     } =
       await window.siteSupabase
-        .from("posts")
+        .from("replies")
         .select(`
+          reply_id,
           post_id,
           author_id,
-          title,
-          category,
-          tags,
           content,
           created_at,
           updated_at
         `)
         .eq("post_id", postId)
-        .single();
+        .order("created_at", {
+          ascending: true
+        });
 
-    if (error) {
-      throw error;
+    if (repliesError) {
+      throw repliesError;
     }
 
-    if (!post) {
-      throw new Error("没有找到帖子");
+    const authorIds = [
+      ...new Set(
+        (replies ?? [])
+          .map(function (reply) {
+            return reply.author_id;
+          })
+          .filter(Boolean)
+      )
+    ];
+
+    let usernameByUserId = {};
+
+    if (authorIds.length > 0) {
+      const {
+        data: profiles,
+        error: profilesError
+      } =
+        await window.siteSupabase
+          .from("profiles")
+          .select("id, username")
+          .in("id", authorIds);
+
+      if (profilesError) {
+        console.warn(
+          "读取回复作者用户名失败：",
+          profilesError
+        );
+      } else {
+        usernameByUserId =
+          Object.fromEntries(
+            (profiles ?? []).map(
+              function (profile) {
+                return [
+                  profile.id,
+                  profile.username
+                ];
+              }
+            )
+          );
+      }
     }
 
-    currentPost = post;
+    replyList.replaceChildren();
 
-    /*
-     * 查询成功后立即显示。
-     */
-    renderDiscussion(post);
+    const replyTotal =
+      replies?.length ?? 0;
 
-    loadReplies(post.post_id);
-    /*
-     * 作者检查不阻塞帖子显示。
-     */
-    checkPostOwnership(post).catch(
-      function (ownershipError) {
-        console.error(
-          "检查作者身份失败：",
-          ownershipError
+    replyCount.textContent =
+      `${replyTotal} 条回复`;
+
+    if (replyTotal === 0) {
+      const emptyMessage =
+        document.createElement("p");
+
+      emptyMessage.className =
+        "reply-status";
+
+      emptyMessage.textContent =
+        "暂时还没有回复，来发表第一条回复吧。";
+
+      replyList.append(emptyMessage);
+      return;
+    }
+
+    for (const reply of replies) {
+      const replyElement =
+        createReplyElement(
+          reply,
+          usernameByUserId,
+          currentUserId
         );
 
-        ownerActions.hidden = true;
-      }
-    );
+      replyList.append(replyElement);
+    }
   } catch (error) {
     console.error(
-      "加载讨论失败：",
+      "加载回复失败：",
       error
     );
 
-    discussionStatus.hidden = false;
+    replyList.replaceChildren();
 
-    discussionStatus.textContent =
-      `帖子加载失败：${
+    const errorMessage =
+      document.createElement("p");
+
+    errorMessage.className =
+      "reply-status reply-error";
+
+    errorMessage.textContent =
+      `回复加载失败：${
         error?.message ?? "未知错误"
       }`;
+
+    replyList.append(errorMessage);
   }
 }
 
@@ -679,10 +745,10 @@ async function loadReplies(postId) {
     replyList.append(errorMessage);
   }
 }
-
 function createReplyElement(
   reply,
-  usernameByUserId
+  usernameByUserId,
+  currentUserId
 ) {
   const article =
     document.createElement("article");
@@ -693,12 +759,20 @@ function createReplyElement(
   article.dataset.replyId =
     reply.reply_id;
 
+
+  /*
+   * 回复头部。
+   */
   const header =
     document.createElement("header");
 
   header.className =
     "reply-card-header";
 
+
+  /*
+   * 作者用户名。
+   */
   const author =
     document.createElement("strong");
 
@@ -712,6 +786,20 @@ function createReplyElement(
     usernameByUserId[reply.author_id]
     ?? fallbackAuthor;
 
+
+  /*
+   * 右侧时间和操作按钮区域。
+   */
+  const headerActions =
+    document.createElement("div");
+
+  headerActions.className =
+    "reply-card-actions";
+
+
+  /*
+   * 回复时间。
+   */
   const time =
     document.createElement("time");
 
@@ -732,30 +820,67 @@ function createReplyElement(
       }
     );
 
-  header.append(author, time);
+  headerActions.append(time);
 
+
+  /*
+   * 只有回复作者本人才能看到删除按钮。
+   */
+  const isReplyAuthor =
+    currentUserId
+    && currentUserId === reply.author_id;
+
+  if (isReplyAuthor) {
+    const deleteButton =
+      document.createElement("button");
+
+    deleteButton.type = "button";
+
+    deleteButton.className =
+      "reply-delete-button";
+
+    deleteButton.textContent =
+      "删除";
+
+    deleteButton.setAttribute(
+      "aria-label",
+      "删除这条回复"
+    );
+
+    deleteButton.addEventListener(
+      "click",
+      function () {
+        deleteReply(
+          reply.reply_id,
+          deleteButton
+        );
+      }
+    );
+
+    headerActions.append(
+      deleteButton
+    );
+  }
+
+  header.append(
+    author,
+    headerActions
+  );
+
+
+  /*
+   * 回复正文，支持 Markdown。
+   */
   const content =
-  document.createElement("div");
+    document.createElement("div");
 
-content.className =
-  "reply-card-content markdown-body";
+  content.className =
+    "reply-card-content markdown-body";
 
-const unsafeHtml =
-  marked.parse(
+  renderReplyMarkdown(
+    content,
     reply.content ?? ""
   );
-
-const safeHtml =
-  DOMPurify.sanitize(
-    unsafeHtml,
-    {
-      USE_PROFILES: {
-        html: true
-      }
-    }
-  );
-
-content.innerHTML = safeHtml;
 
   article.append(
     header,
@@ -1216,4 +1341,104 @@ function goToLoginWithReturnUrl() {
     `../login.html?returnTo=${encodeURIComponent(
       returnUrl
     )}`;
+}
+
+async function deleteReply(
+  replyId,
+  deleteButton
+) {
+  if (!replyId) {
+    return;
+  }
+
+  const confirmed =
+    window.confirm(
+      "确定要删除这条回复吗？此操作无法撤销。"
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  deleteButton.disabled = true;
+  deleteButton.textContent =
+    "正在删除……";
+
+  try {
+    /*
+     * 再次取得当前用户。
+     */
+    const {
+      data: { user },
+      error: userError
+    } =
+      await window.siteSupabase.auth.getUser();
+
+    if (userError) {
+      throw userError;
+    }
+
+    if (!user) {
+      throw new Error(
+        "登录状态已失效，请重新登录。"
+      );
+    }
+
+    /*
+     * 同时限定 reply_id 和 author_id。
+     */
+    const {
+      data: deletedReply,
+      error: deleteError
+    } =
+      await window.siteSupabase
+        .from("replies")
+        .delete()
+        .eq(
+          "reply_id",
+          replyId
+        )
+        .eq(
+          "author_id",
+          user.id
+        )
+        .select("reply_id")
+        .maybeSingle();
+
+    if (deleteError) {
+      throw deleteError;
+    }
+
+    /*
+     * RLS 拒绝时可能没有错误，
+     * 但 deletedReply 会是 null。
+     */
+    if (!deletedReply) {
+      throw new Error(
+        "回复没有被删除，你可能没有删除权限。"
+      );
+    }
+
+    /*
+     * 重新读取回复列表。
+     */
+    await loadReplies(
+      currentPost.post_id
+    );
+  } catch (error) {
+    console.error(
+      "删除回复失败：",
+      error
+    );
+
+    window.alert(
+      `删除回复失败：${
+        error?.message ?? "未知错误"
+      }`
+    );
+
+    deleteButton.disabled = false;
+    deleteButton.textContent =
+      "删除";
+  }
 }
