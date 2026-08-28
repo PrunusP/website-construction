@@ -52,12 +52,44 @@ const replyMarkdownPreview = document.getElementById("replyMarkdownPreview");
 const replyMessage = document.getElementById("replyMessage");
 const replySubmitButton = document.getElementById("replySubmitButton");
 
+let adminIds = new Set();
 let currentPost = null;
 let closeComposerTimer = null;
 
 /* ------------------------------
  * 通用工具
  * ------------------------------ */
+
+
+async function loadAdminIds() {
+  const {
+    data: adminRoles,
+    error
+  } =
+    await window.siteSupabase
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "admin");
+
+  if (error) {
+    console.warn(
+      "读取管理员列表失败：",
+      error
+    );
+
+    adminIds = new Set();
+    return;
+  }
+
+  adminIds =
+    new Set(
+      (adminRoles ?? []).map(
+        role => role.user_id
+      )
+    );
+}
+
+
 function formatDate(dateString) {
   const date = new Date(dateString);
 
@@ -182,6 +214,7 @@ async function loadDiscussion() {
   }
 
   try {
+    await loadAdminIds();
     const { data: post, error } = await window.siteSupabase
       .from("posts")
       .select(`
@@ -207,6 +240,10 @@ async function loadDiscussion() {
 
     currentPost = post;
     renderDiscussion(post);
+
+    await markPostAsViewed(
+      post.post_id
+    );
 
     await Promise.all([
       showPostAuthor(post),
@@ -411,6 +448,21 @@ function createReplyElement(reply, usernameMap, currentUserId) {
   author.textContent =
     usernameMap.get(reply.author_id)
     || fallbackUsername(reply.author_id);
+
+if (adminIds.has(reply.author_id)) {
+  const wrench =
+    document.createElement("span");
+
+  wrench.className = "admin-wrench";
+  wrench.textContent = "🔧︎";
+  wrench.title = "管理员";
+  wrench.setAttribute(
+    "aria-label",
+    "管理员"
+  );
+
+  author.append(" ", wrench);
+}
 
   const headerActions = document.createElement("div");
   headerActions.className = "reply-card-actions";
@@ -617,6 +669,40 @@ async function submitReply(event) {
     replyMessage.textContent = `提交失败：${error.message}`;
   } finally {
     replySubmitButton.disabled = false;
+  }
+}
+
+async function markPostAsViewed(postId) {
+  const {
+    data: { user },
+    error: userError
+  } =
+    await window.siteSupabase.auth.getUser();
+
+  if (userError || !user) {
+    return;
+  }
+
+  const { error } =
+    await window.siteSupabase
+      .from("post_views")
+      .upsert(
+        {
+          user_id: user.id,
+          post_id: postId,
+          viewed_at:
+            new Date().toISOString()
+        },
+        {
+          onConflict: "user_id,post_id"
+        }
+      );
+
+  if (error) {
+    console.error(
+      "记录阅读状态失败：",
+      error
+    );
   }
 }
 
