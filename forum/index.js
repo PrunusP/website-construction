@@ -232,7 +232,7 @@ adminPageButton.hidden =
  
   };
 
-  async function loadForumPosts() {
+ async function loadForumPosts() {
     /*
      * 先清空所有区域中的“正在加载”文字。
      */
@@ -266,6 +266,114 @@ adminPageButton.hidden =
       if (error) {
         throw error;
       }
+
+      /*
+       * 读取置顶记录。读取失败时仍然显示普通帖子，
+       * 同时在控制台保留具体错误。
+       */
+      const {
+        data: pins,
+        error: pinsError
+      } =
+        await window.siteSupabase
+          .from("post_pins")
+          .select("post_id, pinned_at");
+
+      if (pinsError) {
+        console.warn(
+          "读取置顶帖子失败：",
+          pinsError
+        );
+      }
+
+      /*
+       * 只有登录用户才有自己的阅读记录。
+       */
+      let views = [];
+
+      const {
+        data: { user },
+        error: userError
+      } =
+        await window.siteSupabase.auth.getUser();
+
+      if (userError) {
+        console.warn(
+          "读取当前用户失败：",
+          userError
+        );
+      } else if (user) {
+        const {
+          data: userViews,
+          error: viewsError
+        } =
+          await window.siteSupabase
+            .from("post_views")
+            .select("post_id, viewed_at")
+            .eq("user_id", user.id);
+
+        if (viewsError) {
+          console.warn(
+            "读取帖子阅读记录失败：",
+            viewsError
+          );
+        } else {
+          views = userViews ?? [];
+        }
+      }
+
+      const pinByPostId =
+        new Map(
+          (pins ?? []).map(function (pin) {
+            return [String(pin.post_id), pin];
+          })
+        );
+
+      const viewByPostId =
+        new Map(
+          views.map(function (view) {
+            return [String(view.post_id), view];
+          })
+        );
+
+      for (const post of posts ?? []) {
+        const postKey = String(post.post_id);
+        const pin = pinByPostId.get(postKey);
+        const view = viewByPostId.get(postKey);
+
+        /* 钉子只取决于帖子是否仍在 post_pins 中。 */
+        post.isPinned = Boolean(pin);
+
+        /*
+         * 用户从未看过，或者置顶时间晚于阅读时间，
+         * 这个帖子才继续排在区域顶部。
+         */
+        post.isUnreadPinned =
+          Boolean(pin)
+          && (
+            !view
+            || new Date(pin.pinned_at).getTime()
+              > new Date(view.viewed_at).getTime()
+          );
+      }
+
+      /*
+       * 未读置顶帖排在前面；其余帖子按发布时间排列。
+       * 后面再按 category 放入容器，所以每个区域都会保持该顺序。
+       */
+      posts.sort(function (firstPost, secondPost) {
+        if (
+          firstPost.isUnreadPinned
+          !== secondPost.isUnreadPinned
+        ) {
+          return Number(secondPost.isUnreadPinned)
+            - Number(firstPost.isUnreadPinned);
+        }
+
+        return new Date(secondPost.created_at).getTime()
+          - new Date(firstPost.created_at).getTime();
+      });
+
       const authorIds = [
         ...new Set(
           posts
