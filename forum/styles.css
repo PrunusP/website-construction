@@ -1816,3 +1816,60 @@ body.reply-composer-open {
     padding: 14px;
   }
 }
+
+/* 回复右侧时间和操作按钮 */
+.reply-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reply-delete-button {
+  min-height: 30px;
+  border:
+    1px solid
+    rgba(200, 75, 69, 0.35);
+  border-radius: 6px;
+  background:
+    rgba(200, 75, 69, 0.06);
+  padding: 0 10px;
+  color: var(--red);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    color 150ms ease;
+}
+
+.reply-delete-button:hover:not(:disabled) {
+  border-color: var(--red);
+  background: var(--red);
+  color: #ffffff;
+}
+
+.reply-delete-button:focus-visible {
+  outline:
+    3px solid
+    rgba(200, 75, 69, 0.18);
+  outline-offset: 2px;
+}
+
+.reply-delete-button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+@media (max-width: 560px) {
+  .reply-card-header {
+    align-items: flex-start;
+  }
+
+  .reply-card-actions {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 7px;
+  }
+}
