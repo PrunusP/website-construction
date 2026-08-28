@@ -76,7 +76,7 @@ a {
 
 .forum-section-card {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 18px;
   min-height: 116px;
