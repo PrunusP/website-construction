@@ -34,6 +34,41 @@
           修改标题、区域、标签或讨论内容，然后保存你的修改。
         </p>
       </header>
+
+      <form
+        class="discussion-form"
+        id="editDiscussionForm"
+        novalidate
+      >
+        <!-- 标题 -->
+        <label class="discussion-field">
+          <span>Title</span>
+
+          <input
+            id="titleInput"
+            name="title"
+            type="text"
+            minlength="4"
+            maxlength="100"
+            placeholder="用一句话描述你想讨论的内容"
+            required
+          />
+
+          <small>
+            标题长度为 4～100 个字符
+          </small>
+        </label>
+
+
+        <!-- 区域 -->
+        <label class="discussion-field">
+          <span>区域</span>
+
+          <select
+            id="categoryInput"
+            name="category"
+            required
+          >
             <option value="">
               请选择一个区域
             </option>
@@ -41,7 +76,7 @@
             <option value="computer">
               计算机区
             </option>
-      
+
             <option value="physics">
               物理区
             </option>
