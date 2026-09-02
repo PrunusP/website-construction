@@ -227,9 +227,9 @@ adminPageButton.hidden =
     otherLanguage: "其他语言",
     jotting: "随笔",
     criticize: "文学批评",
-    novel: "小说"
-
- 
+    novel: "小说",
+        
+          note: "笔记"
   };
 
  async function loadForumPosts() {
