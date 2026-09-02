@@ -28,6 +28,13 @@
 
         chat: [
           {value: "other",label: "其他"},
+        ],
+        
+        computer: [
+          {value: "other",label: "其他"},     
+          { value: "unsolved", label: "未解决" },
+          { value: "solved", label: "已解决" },
+          {value: "note",label: "note"},   
         ]
       };
 
