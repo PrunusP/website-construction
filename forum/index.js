@@ -228,8 +228,8 @@ adminPageButton.hidden =
     jotting: "随笔",
     criticize: "文学批评",
     novel: "小说",
-        
-          note: "笔记"
+
+    note: "note"
   };
 
  async function loadForumPosts() {
@@ -256,7 +256,8 @@ adminPageButton.hidden =
             category,
             tags,
             content,
-            created_at
+            created_at,
+            replies(count)
           `)
           .order("created_at", {
             ascending: false
@@ -568,21 +569,65 @@ if (post.isPinned) {
 
     author.textContent = username;
 
-    const openText =
-        document.createElement("span");
+    /*
+ * 取得当前帖子的回复数量。
+ * 如果 Supabase 没有返回统计结果，
+ * 就使用 0。
+ */
+const numberOfReplies =
+  post.replies?.[0]?.count ?? 0;
 
-    openText.className = "forum-post-open";
-    openText.textContent = "查看讨论 ›";
 
-    
+/*
+ * 创建回复数量方框。
+ */
+const replyCountBadge =
+  document.createElement("span");
 
-    footer.append(author, openText);
+replyCountBadge.className =
+  "forum-post-reply-count";
 
-    card.append(
-      heading,
-      tagsContainer,
-      footer
-    );
+replyCountBadge.textContent =
+  `${numberOfReplies} 回复`;
+
+
+/*
+ * “查看讨论”文字。
+ */
+const openText =
+  document.createElement("span");
+
+openText.className =
+  "forum-post-open";
+
+openText.textContent =
+  "查看讨论 ›";
+
+
+/*
+ * 创建右侧操作容器，
+ * 让回复数位于“查看讨论”左边。
+ */
+const footerActions =
+  document.createElement("div");
+
+footerActions.className =
+  "forum-post-footer-actions";
+
+footerActions.append(
+  replyCountBadge,
+  openText
+);
+
+
+/*
+ * 作者位于左边，
+ * 回复数和查看讨论位于右边。
+ */
+footer.append(
+  author,
+  footerActions
+); 
 
     return card;
   } 
